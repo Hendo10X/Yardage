@@ -151,28 +151,33 @@ export const orderRouter = router({
         return { items: [], total: 0, page: input.page, totalPages: 0 };
       }
 
-      const orders = await db.query.order.findMany({
-        where: and(
-          inArray(order.id, orderIds),
-          ...(input.status ? [eq(order.status, input.status)] : []),
-        ),
-        with: {
-          items: {
-            with: { product: true },
-            where: eq(orderItem.storeId, ctx.store.id),
+      const where = and(
+        inArray(order.id, orderIds),
+        ...(input.status ? [eq(order.status, input.status)] : []),
+      );
+
+      const [orders, [{ total }]] = await Promise.all([
+        db.query.order.findMany({
+          where,
+          with: {
+            items: {
+              with: { product: true },
+              where: eq(orderItem.storeId, ctx.store.id),
+            },
+            buyer: true,
           },
-          buyer: true,
-        },
-        orderBy: desc(order.createdAt),
-        limit: input.limit,
-        offset: (input.page - 1) * input.limit,
-      });
+          orderBy: desc(order.createdAt),
+          limit: input.limit,
+          offset: (input.page - 1) * input.limit,
+        }),
+        db.select({ total: count() }).from(order).where(where),
+      ]);
 
       return {
         items: orders,
-        total: orderIds.length,
+        total,
         page: input.page,
-        totalPages: Math.ceil(orderIds.length / input.limit),
+        totalPages: Math.ceil(total / input.limit),
       };
     }),
 
@@ -208,15 +213,11 @@ export const orderRouter = router({
         );
 
       if (input.status === OrderStatus.COMPLETED) {
-        const storeItems = found.items.filter(
-          (item) => item.storeId === ctx.store.id,
-        );
-        for (const item of storeItems) {
-          await db
-            .update(product)
-            .set({ status: ProductStatus.SOLD })
-            .where(eq(product.id, item.productId));
-        }
+        const productIds = found.items.map((item) => item.productId);
+        await db
+          .update(product)
+          .set({ status: ProductStatus.SOLD })
+          .where(inArray(product.id, productIds));
       }
 
       const [updated] = await db
