@@ -6,16 +6,8 @@ import { useState } from "react";
 import superjson from "superjson";
 import { trpc } from "@/lib/trpc";
 
-/**
- * Returns the base URL for tRPC requests.
- * - Browser: uses relative URL (same origin via Next.js API route)
- * - SSR: uses absolute URL
- *
- * To use the standalone Elysia server instead, change the URL to:
- * `http://localhost:3001/trpc`
- */
 function getBaseUrl() {
-  if (typeof window !== "undefined") return ""; // browser uses relative URL
+  if (typeof window !== "undefined") return "";
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   return `http://localhost:${process.env.PORT ?? 3000}`;
 }
@@ -26,11 +18,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 5 * 60 * 1000, // 5 minutes
+            staleTime: 5 * 60 * 1000,
             refetchOnWindowFocus: false,
           },
         },
-      })
+      }),
   );
 
   const [trpcClient] = useState(() =>
@@ -39,26 +31,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
           transformer: superjson,
-          /**
-           * Include credentials so auth cookies are sent with each request.
-           * This is essential for better-auth session validation.
-           */
           fetch(url, options) {
-            return fetch(url, {
-              ...options,
-              credentials: "include",
-            });
+            return fetch(url, { ...options, credentials: "include" });
           },
         }),
       ],
-    })
+    }),
   );
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </trpc.Provider>
   );
 }

@@ -1,5 +1,38 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  index,
+  integer,
+  pgEnum,
+} from "drizzle-orm/pg-core";
+
+// ── Enums ──
+
+export const productConditionEnum = pgEnum("product_condition", [
+  "new",
+  "like_new",
+  "good",
+  "fair",
+  "poor",
+]);
+
+export const productStatusEnum = pgEnum("product_status", [
+  "active",
+  "sold",
+  "draft",
+]);
+
+export const orderStatusEnum = pgEnum("order_status", [
+  "pending",
+  "confirmed",
+  "completed",
+  "cancelled",
+]);
+
+// ── Auth Tables (managed by better-auth) ──
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -73,9 +106,126 @@ export const verification = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
+// ── E-commerce Tables ──
+
+export const store = pgTable(
+  "stores",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: text("name").notNull(),
+    description: text("description"),
+    slug: text("slug").notNull().unique(),
+    image: text("image"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    isActive: boolean("is_active").default(true).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("store_userId_idx").on(table.userId),
+    index("store_slug_idx").on(table.slug),
+  ],
+);
+
+export const category = pgTable("categories", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const product = pgTable(
+  "products",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: text("name").notNull(),
+    description: text("description"),
+    price: integer("price").notNull(),
+    images: text("images").array().default([]),
+    condition: productConditionEnum("condition").notNull(),
+    status: productStatusEnum("status").default("draft").notNull(),
+    storeId: text("store_id")
+      .notNull()
+      .references(() => store.id, { onDelete: "cascade" }),
+    categoryId: text("category_id").references(() => category.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("product_storeId_idx").on(table.storeId),
+    index("product_categoryId_idx").on(table.categoryId),
+    index("product_status_idx").on(table.status),
+  ],
+);
+
+export const order = pgTable(
+  "orders",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    buyerId: text("buyer_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    status: orderStatusEnum("status").default("pending").notNull(),
+    totalAmount: integer("total_amount").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("order_buyerId_idx").on(table.buyerId)],
+);
+
+export const orderItem = pgTable(
+  "order_items",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => order.id, { onDelete: "cascade" }),
+    productId: text("product_id")
+      .notNull()
+      .references(() => product.id),
+    storeId: text("store_id")
+      .notNull()
+      .references(() => store.id),
+    price: integer("price").notNull(),
+    quantity: integer("quantity").notNull().default(1),
+  },
+  (table) => [
+    index("orderItem_orderId_idx").on(table.orderId),
+    index("orderItem_productId_idx").on(table.productId),
+  ],
+);
+
+// ── Relations ──
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
+  stores: many(store),
+  orders: many(order),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -90,4 +240,35 @@ export const accountRelations = relations(account, ({ one }) => ({
     fields: [account.userId],
     references: [user.id],
   }),
+}));
+
+export const storeRelations = relations(store, ({ one, many }) => ({
+  owner: one(user, { fields: [store.userId], references: [user.id] }),
+  products: many(product),
+}));
+
+export const categoryRelations = relations(category, ({ many }) => ({
+  products: many(product),
+}));
+
+export const productRelations = relations(product, ({ one }) => ({
+  store: one(store, { fields: [product.storeId], references: [store.id] }),
+  category: one(category, {
+    fields: [product.categoryId],
+    references: [category.id],
+  }),
+}));
+
+export const orderRelations = relations(order, ({ one, many }) => ({
+  buyer: one(user, { fields: [order.buyerId], references: [user.id] }),
+  items: many(orderItem),
+}));
+
+export const orderItemRelations = relations(orderItem, ({ one }) => ({
+  order: one(order, { fields: [orderItem.orderId], references: [order.id] }),
+  product: one(product, {
+    fields: [orderItem.productId],
+    references: [product.id],
+  }),
+  store: one(store, { fields: [orderItem.storeId], references: [store.id] }),
 }));
