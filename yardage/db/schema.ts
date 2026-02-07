@@ -7,6 +7,7 @@ import {
   index,
   integer,
   pgEnum,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 // ── Enums ──
@@ -219,6 +220,36 @@ export const orderItem = pgTable(
   ],
 );
 
+export const review = pgTable(
+  "reviews",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    rating: integer("rating").notNull(),
+    comment: text("comment"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    productId: text("product_id")
+      .notNull()
+      .references(() => product.id, { onDelete: "cascade" }),
+    storeId: text("store_id")
+      .notNull()
+      .references(() => store.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("review_user_product_idx").on(table.userId, table.productId),
+    index("review_productId_idx").on(table.productId),
+    index("review_storeId_idx").on(table.storeId),
+  ],
+);
+
 // ── Relations ──
 
 export const userRelations = relations(user, ({ many }) => ({
@@ -226,6 +257,7 @@ export const userRelations = relations(user, ({ many }) => ({
   accounts: many(account),
   stores: many(store),
   orders: many(order),
+  reviews: many(review),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -245,18 +277,20 @@ export const accountRelations = relations(account, ({ one }) => ({
 export const storeRelations = relations(store, ({ one, many }) => ({
   owner: one(user, { fields: [store.userId], references: [user.id] }),
   products: many(product),
+  reviews: many(review),
 }));
 
 export const categoryRelations = relations(category, ({ many }) => ({
   products: many(product),
 }));
 
-export const productRelations = relations(product, ({ one }) => ({
+export const productRelations = relations(product, ({ one, many }) => ({
   store: one(store, { fields: [product.storeId], references: [store.id] }),
   category: one(category, {
     fields: [product.categoryId],
     references: [category.id],
   }),
+  reviews: many(review),
 }));
 
 export const orderRelations = relations(order, ({ one, many }) => ({
@@ -271,4 +305,13 @@ export const orderItemRelations = relations(orderItem, ({ one }) => ({
     references: [product.id],
   }),
   store: one(store, { fields: [orderItem.storeId], references: [store.id] }),
+}));
+
+export const reviewRelations = relations(review, ({ one }) => ({
+  user: one(user, { fields: [review.userId], references: [user.id] }),
+  product: one(product, {
+    fields: [review.productId],
+    references: [product.id],
+  }),
+  store: one(store, { fields: [review.storeId], references: [store.id] }),
 }));
