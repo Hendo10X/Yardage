@@ -1,17 +1,20 @@
 import { router } from "../trpc";
-import { userRouter } from "./user";
+import { storeRouter } from "./store";
+import { productRouter } from "./product";
+import { categoryRouter } from "./category";
+import { orderRouter } from "./order";
+import { reviewRouter } from "./review";
+import { vendorRouter } from "./vendor";
+import { messageRouter } from "./message";
 
-/**
- * Main app router - combines all sub-routers.
- * Add new routers here as your app grows.
- */
 export const appRouter = router({
-  user: userRouter,
+  store: storeRouter,
+  product: productRouter,
+  category: categoryRouter,
+  order: orderRouter,
+  review: reviewRouter,
+  vendor: vendorRouter,
+  message: messageRouter,
 });
 
-/**
- * Export the type definition of the API.
- * This is used on the client side to infer types.
- * ONLY export the type — never the router instance to the client!
- */
 export type AppRouter = typeof appRouter;

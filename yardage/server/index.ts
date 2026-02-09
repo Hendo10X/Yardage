@@ -9,19 +9,18 @@ const app = new Elysia()
     cors({
       origin: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
       credentials: true,
-    })
+    }),
   )
-  .get("/", () => "Yardage API is running")
   .use(
     trpc(appRouter, {
       endpoint: "/trpc",
       createContext,
-    })
+    }),
   )
   .listen(3001);
 
 console.log(
-  `🦊 Elysia server is running at http://localhost:${app.server?.port}/trpc`
+  `Elysia server running at http://localhost:${app.server?.port}/trpc`,
 );
 
 export type { AppRouter } from "./routers";
