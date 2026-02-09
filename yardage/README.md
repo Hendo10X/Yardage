@@ -54,6 +54,8 @@ npm run dev:api      # Standalone Elysia server on port 3001 (requires Bun)
 | `orders` | Buyer orders with status tracking |
 | `order_items` | Individual items per order, price snapshot at purchase |
 | `reviews` | Product reviews with 1-5 rating |
+| `conversations` | Message threads tied to a buyer + product (unique per pair) |
+| `messages` | Individual messages within a conversation, with read tracking |
 
 ## API Reference
 
@@ -133,6 +135,28 @@ Completing an order marks all products in it as SOLD.
 | `review.update` | mutation | protected | Edit your review |
 | `review.delete` | mutation | protected | Delete your review |
 
+### Vendor
+
+| Procedure | Type | Tier | Description |
+|---|---|---|---|
+| `vendor.checkStatus` | query | protected | Check if user has a store (buyer vs vendor mode) |
+| `vendor.stats` | query | seller | Dashboard stats: active, pending, sold counts + total earned |
+
+**`vendor.stats` response**: `{ active, pending, sold, earned }` — `pending` counts products with in-progress orders, `earned` is total cents from completed orders.
+
+### Message
+
+| Procedure | Type | Tier | Description |
+|---|---|---|---|
+| `message.startConversation` | mutation | protected | Start or continue a conversation about a product (sends first message) |
+| `message.send` | mutation | protected | Send a message in an existing conversation |
+| `message.getConversation` | query | protected | Get conversation with paginated messages (auto-marks as read) |
+| `message.listMine` | query | protected | List your conversations with latest message (filterable by `role`: buyer/seller) |
+| `message.listByProduct` | query | seller | Vendor inbox — conversations for a specific product |
+| `message.markAsRead` | mutation | protected | Mark all unread messages from the other participant as read |
+
+One conversation per buyer per product. Both buyer and seller can send messages. `listByProduct` powers the vendor inbox where conversations are grouped by product (e.g. "[Lamp photo] - Message from John").
+
 ### File Upload
 
 UploadThing endpoints at `/api/uploadthing`:
@@ -202,6 +226,8 @@ All errors are thrown as `TRPCError` with standard codes:
 │       ├── product.ts
 │       ├── category.ts
 │       ├── order.ts
-│       └── review.ts
+│       ├── review.ts
+│       ├── vendor.ts
+│       └── message.ts
 └── drizzle.config.ts
 ```

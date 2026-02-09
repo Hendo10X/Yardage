@@ -250,6 +250,57 @@ export const review = pgTable(
   ],
 );
 
+export const conversation = pgTable(
+  "conversations",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    buyerId: text("buyer_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    sellerId: text("seller_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    productId: text("product_id")
+      .notNull()
+      .references(() => product.id, { onDelete: "cascade" }),
+    storeId: text("store_id")
+      .notNull()
+      .references(() => store.id, { onDelete: "cascade" }),
+    lastMessageAt: timestamp("last_message_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("conversation_buyer_product_idx").on(
+      table.buyerId,
+      table.productId,
+    ),
+    index("conversation_storeId_idx").on(table.storeId),
+    index("conversation_buyerId_idx").on(table.buyerId),
+    index("conversation_productId_idx").on(table.productId),
+  ],
+);
+
+export const message = pgTable(
+  "messages",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    conversationId: text("conversation_id")
+      .notNull()
+      .references(() => conversation.id, { onDelete: "cascade" }),
+    senderId: text("sender_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    content: text("content").notNull(),
+    isRead: boolean("is_read").default(false).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [index("message_conversationId_idx").on(table.conversationId)],
+);
+
 // ── Relations ──
 
 export const userRelations = relations(user, ({ many }) => ({
@@ -258,6 +309,13 @@ export const userRelations = relations(user, ({ many }) => ({
   stores: many(store),
   orders: many(order),
   reviews: many(review),
+  buyerConversations: many(conversation, {
+    relationName: "buyerConversations",
+  }),
+  sellerConversations: many(conversation, {
+    relationName: "sellerConversations",
+  }),
+  sentMessages: many(message, { relationName: "sentMessages" }),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -278,6 +336,7 @@ export const storeRelations = relations(store, ({ one, many }) => ({
   owner: one(user, { fields: [store.userId], references: [user.id] }),
   products: many(product),
   reviews: many(review),
+  conversations: many(conversation),
 }));
 
 export const categoryRelations = relations(category, ({ many }) => ({
@@ -291,6 +350,7 @@ export const productRelations = relations(product, ({ one, many }) => ({
     references: [category.id],
   }),
   reviews: many(review),
+  conversations: many(conversation),
 }));
 
 export const orderRelations = relations(order, ({ one, many }) => ({
@@ -314,4 +374,41 @@ export const reviewRelations = relations(review, ({ one }) => ({
     references: [product.id],
   }),
   store: one(store, { fields: [review.storeId], references: [store.id] }),
+}));
+
+export const conversationRelations = relations(
+  conversation,
+  ({ one, many }) => ({
+    buyer: one(user, {
+      fields: [conversation.buyerId],
+      references: [user.id],
+      relationName: "buyerConversations",
+    }),
+    seller: one(user, {
+      fields: [conversation.sellerId],
+      references: [user.id],
+      relationName: "sellerConversations",
+    }),
+    product: one(product, {
+      fields: [conversation.productId],
+      references: [product.id],
+    }),
+    store: one(store, {
+      fields: [conversation.storeId],
+      references: [store.id],
+    }),
+    messages: many(message),
+  }),
+);
+
+export const messageRelations = relations(message, ({ one }) => ({
+  conversation: one(conversation, {
+    fields: [message.conversationId],
+    references: [conversation.id],
+  }),
+  sender: one(user, {
+    fields: [message.senderId],
+    references: [user.id],
+    relationName: "sentMessages",
+  }),
 }));
