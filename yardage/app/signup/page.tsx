@@ -6,9 +6,9 @@ import Link from "next/link"
 
 const SignupPage = () => {
   return (
-    <div className="h-screen py-12 px-6 md:px-14 bg-[#F9F3FD]">
+    <div className="h-screen py-6 px-6 md:px-14 bg-[#F9F3FD]">
       <Link href="/" className="text-[14px] font-normal text-left text-[#828181] flex items-center gap-2"> <ArrowLeft /> Back</Link>
-        <div className="flex flex-col items-center justify-center gap-6 py-8">
+        <div className="flex flex-col items-center justify-center gap-6 py-6">
           <div className="flex flex-col items-start justify-start gap-6">
             <div className="flex flex-col items-start gap-3">
             <Image src={Logo} alt="Logo" width={100} height={100} />

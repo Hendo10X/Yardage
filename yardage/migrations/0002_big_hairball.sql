@@ -1,0 +1,1 @@
+ALTER TABLE "account" ALTER COLUMN "created_at" DROP DEFAULT;

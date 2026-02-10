@@ -13,7 +13,13 @@ export const createContext = async (opts: FetchCreateContextFnOptions) => {
 
   return {
     session,
-    user: session?.user ?? null,
+    user: session?.user
+      ? {
+          ...session.user,
+          role: (session.user as any).role as "USER" | "SELLER",
+          universityId: (session.user as any).universityId as string | undefined,
+        }
+      : null,
   };
 };
 
@@ -39,19 +45,19 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
 
 export const sellerProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
+    if (ctx.user.role !== "SELLER") {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "You must be a seller to perform this action",
+      });
+    }
+
     const [userStore] = await db
       .select()
       .from(store)
       .where(eq(store.userId, ctx.user.id))
       .limit(1);
 
-    if (!userStore) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "You must create a store first",
-      });
-    }
-
-    return next({ ctx: { ...ctx, store: userStore } });
+    return next({ ctx: { ...ctx, store: userStore ?? null } });
   },
 );
