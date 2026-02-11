@@ -33,6 +33,12 @@ export const orderStatusEnum = pgEnum("order_status", [
   "cancelled",
 ]);
 
+export const paymentStatusEnum = pgEnum("payment_status", [
+  "pending",
+  "paid",
+  "failed",
+]);
+
 // ── Auth Tables (managed by better-auth) ──
 
 export const user = pgTable("user", {
@@ -187,6 +193,11 @@ export const order = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     status: orderStatusEnum("status").default("pending").notNull(),
     totalAmount: integer("total_amount").notNull(),
+    paymentReference: text("payment_reference").unique(),
+    paymentStatus: paymentStatusEnum("payment_status")
+      .default("pending")
+      .notNull(),
+    paidAt: timestamp("paid_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

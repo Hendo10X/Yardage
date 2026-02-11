@@ -24,6 +24,7 @@ Create a `.env` file:
 DATABASE_URL=your_neon_connection_string
 BETTER_AUTH_SECRET=your_secret
 UPLOADTHING_TOKEN=your_uploadthing_token
+PAYSTACK_SECRET_KEY=your_paystack_secret_key
 ```
 
 Run database migrations:
@@ -118,12 +119,12 @@ Handled by better-auth at `/api/auth/*`. Sign up, sign in, and sign out create/d
 **Order status flow**:
 
 ```
-PENDING → CONFIRMED → COMPLETED
-  ↓            ↓
-CANCELLED   CANCELLED
+PENDING (unpaid) → [Paystack payment] → CONFIRMED (paid) → COMPLETED
+       ↓                                       ↓
+   CANCELLED                                CANCELLED
 ```
 
-Completing an order marks all products in it as SOLD.
+Payment via Paystack is the **only** path from PENDING to CONFIRMED. Sellers cannot manually confirm — they only see paid orders. Completing an order marks all products in it as SOLD.
 
 ### Review
 
@@ -134,6 +135,22 @@ Completing an order marks all products in it as SOLD.
 | `review.getByStore` | query | public | Reviews across a store (includes average rating) |
 | `review.update` | mutation | protected | Edit your review |
 | `review.delete` | mutation | protected | Delete your review |
+
+### Payment
+
+| Procedure | Type | Tier | Description |
+|---|---|---|---|
+| `payment.initialize` | mutation | protected | Initialize Paystack checkout for an order, returns authorization URL |
+| `payment.verify` | query | protected | Verify payment status with Paystack and update order |
+
+**Paystack webhook** at `/api/paystack/webhook` handles `charge.success` events with HMAC SHA512 signature validation. This is the primary confirmation path — `payment.verify` is a fallback for frontend polling.
+
+**Frontend flow**:
+1. `order.create` → get orderId
+2. `payment.initialize({ orderId, callbackUrl })` → get authorization URL
+3. Redirect buyer to Paystack checkout
+4. Paystack redirects back, webhook fires
+5. `payment.verify({ orderId })` → confirm payment status
 
 ### Vendor
 
@@ -174,6 +191,7 @@ Both require authentication.
 ProductCondition: new, like_new, good, fair, poor
 ProductStatus:    active, sold, draft
 OrderStatus:      pending, confirmed, completed, cancelled
+PaymentStatus:    pending, paid, failed
 SortBy:           newest, oldest, price_asc, price_desc
 ```
 
@@ -200,6 +218,8 @@ All errors are thrown as `TRPCError` with standard codes:
 │   ├── api/
 │   │   ├── auth/[...all]/route.ts    # better-auth handler
 │   │   ├── trpc/[...trpc]/route.ts   # tRPC handler
+│   │   ├── paystack/
+│   │   │   └── webhook/route.ts      # Paystack webhook handler
 │   │   └── uploadthing/
 │   │       ├── core.ts               # upload endpoints
 │   │       └── route.ts              # uploadthing handler
@@ -213,6 +233,7 @@ All errors are thrown as `TRPCError` with standard codes:
 │   ├── auth.ts                        # better-auth server config
 │   ├── auth-client.ts                 # better-auth client
 │   ├── errors.ts                      # error helpers
+│   ├── paystack.ts                    # Paystack API client
 │   ├── trpc.ts                        # typed tRPC React hooks
 │   ├── uploadthing.ts                 # typed upload components
 │   └── utils.ts                       # slug generation, cn()
@@ -228,6 +249,7 @@ All errors are thrown as `TRPCError` with standard codes:
 │       ├── order.ts
 │       ├── review.ts
 │       ├── vendor.ts
-│       └── message.ts
+│       ├── message.ts
+│       └── payment.ts
 └── drizzle.config.ts
 ```

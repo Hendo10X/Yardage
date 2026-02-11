@@ -185,7 +185,7 @@ export const orderRouter = router({
     .input(
       z.object({
         orderId: z.string(),
-        status: z.enum([OrderStatus.CONFIRMED, OrderStatus.COMPLETED, OrderStatus.CANCELLED]),
+        status: z.enum([OrderStatus.COMPLETED, OrderStatus.CANCELLED]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -202,7 +202,7 @@ export const orderRouter = router({
       if (!hasStoreItems) forbidden();
 
       const validTransitions: Record<string, string[]> = {
-        [OrderStatus.PENDING]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
+        [OrderStatus.PENDING]: [OrderStatus.CANCELLED],
         [OrderStatus.CONFIRMED]: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
       };
 

@@ -19,6 +19,12 @@ export enum OrderStatus {
   CANCELLED = "cancelled",
 }
 
+export enum PaymentStatus {
+  PENDING = "pending",
+  PAID = "paid",
+  FAILED = "failed",
+}
+
 export enum SortBy {
   NEWEST = "newest",
   OLDEST = "oldest",
