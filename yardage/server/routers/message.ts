@@ -4,6 +4,7 @@ import { router, protectedProcedure, sellerProcedure } from "../trpc";
 import { db } from "../../db/drizzle";
 import { conversation, message, product } from "../../db/schema";
 import { notFound, forbidden, badRequest } from "../../lib/errors";
+import { scanMessage } from "../../lib/message-guard";
 
 export const messageRouter = router({
   startConversation: protectedProcedure
@@ -34,6 +35,8 @@ export const messageRouter = router({
         )
         .limit(1);
 
+      const guard = scanMessage(input.content);
+
       if (existing) {
         const [msg] = await db
           .insert(message)
@@ -49,7 +52,7 @@ export const messageRouter = router({
           .set({ lastMessageAt: new Date() })
           .where(eq(conversation.id, existing.id));
 
-        return { conversation: existing, message: msg };
+        return { conversation: existing, message: msg, ...guard };
       }
 
       const [newConversation] = await db
@@ -71,7 +74,7 @@ export const messageRouter = router({
         })
         .returning();
 
-      return { conversation: newConversation, message: msg };
+      return { conversation: newConversation, message: msg, ...guard };
     }),
 
   send: protectedProcedure
@@ -92,6 +95,8 @@ export const messageRouter = router({
       if (conv.buyerId !== ctx.user.id && conv.sellerId !== ctx.user.id)
         forbidden("You are not a participant in this conversation");
 
+      const guard = scanMessage(input.content);
+
       const [msg] = await db
         .insert(message)
         .values({
@@ -106,7 +111,7 @@ export const messageRouter = router({
         .set({ lastMessageAt: new Date() })
         .where(eq(conversation.id, conv.id));
 
-      return msg;
+      return { message: msg, ...guard };
     }),
 
   getConversation: protectedProcedure
