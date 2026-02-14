@@ -71,7 +71,7 @@ export default function UserDropdown() {
                 >
                     <div className="px-4 py-2 border-b border-gray-50 mb-1">
                         <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">Logged in as</p>
-                        <p className="text-sm font-bold text-gray-900 truncate uppercase">{user.name}</p>
+                        <p className="text-sm font-bold text-gray-900 truncate capitalize">{user.name}</p>
                     </div>
                     
                     <button 

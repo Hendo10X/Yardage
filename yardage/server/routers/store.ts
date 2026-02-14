@@ -2,7 +2,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { db } from "../../db/drizzle";
-import { store } from "../../db/schema";
+import { store, user } from "../../db/schema";
 import { notFound, conflict } from "../../lib/errors";
 import { generateSlug } from "../../lib/utils";
 
@@ -34,6 +34,12 @@ export const storeRouter = router({
           userId: ctx.user.id,
         })
         .returning();
+
+      // Update user role to SELLER
+      await db
+        .update(user)
+        .set({ role: "SELLER" })
+        .where(eq(user.id, ctx.user.id));
 
       return created;
     }),

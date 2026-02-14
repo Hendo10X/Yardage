@@ -1,21 +1,74 @@
 "use client"
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import Navbar from "@/components/buyer/navbar"
 import { Footer } from "@/components/Footer"
-import Product1 from "@/images/product1.png"
-import Product2 from "@/images/product2.png"
-import Product3 from "@/images/product3.png"
-import Product4 from "@/images/product4.png"
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
+import { trpc } from '@/lib/trpc'
+import { Loader2, Package } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function ProductPage() {
   const params = useParams()
-  const [selectedImage, setSelectedImage] = useState(Product1)
+  const router = useRouter()
+  const productId = params.id as string
   
+  const { data: product, isLoading, error } = trpc.product.getById.useQuery({ id: productId })
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  
+  const createOrder = trpc.order.create.useMutation({
+    onSuccess: (order) => {
+      toast.success("Order placed successfully!")
+      router.push(`/dashboard/buyer/orders/${order?.id}`)
+    },
+    onError: (err) => {
+      if (err.message.includes("UNAUTHORIZED")) {
+        toast.error("Please login to buy products")
+        router.push("/login")
+      } else {
+        toast.error(err.message || "Failed to place order")
+      }
+    }
+  })
+
+  // Update selected image when product data arrives
+  useEffect(() => {
+    if (product?.images?.length) {
+      setSelectedImage(product.images[0])
+    }
+  }, [product])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#FDFBFF] flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-[#8E74FF]" />
+      </div>
+    )
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-[#FDFBFF]">
+        <Navbar />
+        <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+          <Package size={64} className="text-gray-300" />
+          <h1 className="text-2xl font-bold">Product not found</h1>
+          <Link href="/" className="text-[#8E74FF] hover:underline">Return to home</Link>
+        </div>
+        <Footer />
+      </div>
+    )
+  }
+
+  const handleBuy = async () => {
+    await createOrder.mutateAsync({
+      items: [{ productId: product.id, quantity: 1 }]
+    })
+  }
+
   return (
     <div className='min-h-screen bg-[#FDFBFF]'>
       <Navbar />
@@ -24,78 +77,90 @@ export default function ProductPage() {
             {/* Left Column - Main Image */}
             <div className="w-full lg:w-1/2">
                 <div className="relative aspect-square w-full bg-[#E5E5E5] rounded-[20px] overflow-hidden">
-                    <Image 
-                        src={selectedImage} 
-                        alt="Clip-On Bedside Shelf" 
-                        fill
-                        className="object-cover transition-all duration-300"
-                        priority
-                    />
+                    {selectedImage ? (
+                      <Image 
+                          src={selectedImage} 
+                          alt={product.name} 
+                          fill
+                          className="object-cover transition-all duration-300"
+                          priority
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package size={80} className="text-gray-300" />
+                      </div>
+                    )}
                 </div>
             </div>
 
             {/* Right Column - Details */}
             <div className="w-full lg:w-1/2 flex flex-col pt-4">
                 <h1 className="text-[48px] leading-[1.1] font-medium text-black mb-4">
-                    Clip-On<br />Bedside Shelf
+                    {product.name}
                 </h1>
 
                 <div className="flex items-center gap-4 mb-8">
-                    <p className="text-[18px] text-[#666666]">Posted by Ada</p>
+                    <p className="text-[18px] text-[#666666]">Posted by {product.store.name}</p>
                     <Link href="#" className="text-[18px] text-[#9369FF] hover:underline">
                         Visit profile
                     </Link>
                 </div>
 
                 <div className="space-y-6 text-[18px] leading-[1.6] text-[#1A1A1A] mb-8">
-                    <p>
-                        Step into sunshine. The Model 000 in Sunflower Yellow brings everyday comfort and effortless style to your routine — lightweight, breathable, and built to keep up with you from morning walks to late nights out.
+                    <p className="whitespace-pre-wrap">
+                        {product.description || "No description provided."}
                     </p>
                 </div>
 
                 <div className="space-y-2 mb-10">
-                    <p className="text-[18px] font-medium">Quality: 5.6/10</p>
-                    <p className="text-[18px] font-medium">Period of usage: 5months</p>
+                    <p className="text-[18px] font-medium uppercase tracking-tight text-[#666666]">Condition: <span className="text-black capitalize">{product.condition.replace('_', ' ')}</span></p>
+                    <p className="text-[18px] font-medium uppercase tracking-tight text-[#666666]">Category: <span className="text-black">{product.category?.name || 'Uncategorized'}</span></p>
                 </div>
 
                 {/* Thumbnails */}
-                <div className="flex gap-4 mb-12">
-                     {[Product1, Product2, Product3, Product4].map((img, index) => (
-                        <div 
-                            key={index} 
-                            onClick={() => setSelectedImage(img)}
-                            className={`relative w-[80px] h-[80px] rounded-lg overflow-hidden cursor-pointer transition-all duration-200 ${
-                                selectedImage === img ? 'ring-2 ring-[#9369FF]' : 'opacity-60 hover:opacity-100'
-                            }`}
-                        >
-                            <Image 
-                                src={img} 
-                                alt={`View ${index + 1}`} 
-                                fill
-                                className="object-cover"
-                            />
-                        </div>
-                     ))}
-                </div>
+                {product.images && product.images.length > 1 && (
+                  <div className="flex gap-4 mb-12 overflow-x-auto pb-2 scrollbar-hide">
+                       {product.images.map((img, index) => (
+                          <div 
+                              key={index} 
+                              onClick={() => setSelectedImage(img)}
+                              className={`relative flex-shrink-0 w-[80px] h-[80px] rounded-lg overflow-hidden cursor-pointer transition-all duration-200 ${
+                                  selectedImage === img ? 'ring-2 ring-[#9369FF]' : 'opacity-60 hover:opacity-100'
+                              }`}
+                          >
+                              <Image 
+                                  src={img} 
+                                  alt={`View ${index + 1}`} 
+                                  fill
+                                  className="object-cover"
+                              />
+                          </div>
+                       ))}
+                  </div>
+                )}
 
                 {/* Actions */}
                 <div className="flex flex-col gap-4 max-w-[400px]">
                     <Button 
                         variant="secondary" 
+                        onClick={() => toast.success("Added to wishlist!")}
                         className="w-full h-[56px] rounded-full text-[16px] font-medium bg-[#F0F0F0] hover:bg-[#E0E0E0] text-black"
                     >
                         Add to wishlist
                     </Button>
                     <Button 
                         variant="secondary"
+                        onClick={() => toast.info("Negotiation feature coming soon!")}
                         className="w-full h-[56px] rounded-full text-[16px] font-medium bg-[#F0F0F0] hover:bg-[#E0E0E0] text-black"
                     >
                         Negotiate price
                     </Button>
                     <Button 
-                        className="w-full h-[56px] rounded-full text-[16px] font-medium bg-black hover:bg-neutral-800 text-white"
+                        onClick={handleBuy}
+                        disabled={createOrder.isPending}
+                        className="w-full h-[56px] rounded-full text-[16px] font-medium bg-black hover:bg-neutral-800 text-white disabled:opacity-50"
                     >
-                        Buy for N15,000
+                        {createOrder.isPending ? "Processing..." : `Buy for ₦${product.price.toLocaleString()}`}
                     </Button>
                 </div>
             </div>

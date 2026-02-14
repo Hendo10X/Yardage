@@ -9,151 +9,10 @@ import { Button } from "../ui/button"
 import { Loader2 } from "lucide-react"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
-import Product1 from "@/images/product1.png"
-import Product2 from "@/images/product2.png"
-import Product3 from "@/images/product3.png"
-import Product4 from "@/images/product4.png"
-import Product5 from "@/images/product5.png"
-import Product6 from "@/images/product6.png"
-import Product7 from "@/images/product7.png"
-import Product8 from "@/images/product8.png"
-import Product9 from "@/images/product9.png"
-import Product10 from "@/images/product10.png"
-import Product11 from "@/images/product11.png"
-import Product12 from "@/images/product12.png"
+import { trpc } from '@/lib/trpc'
+import { ProductCondition } from '@/server/enums'
 
-const Products = [
-    {
-        id: 1,
-        name: "Clip-On Bedside Shelf",
-        PostedBy: "Ada",
-        price: "N30,000",
-        priceValue: 30000,
-        image: Product1,
-        isNew: true,
-        category: "Furniture",
-        condition: "good"
-    },
-    {
-        id: 2,
-        name: "Adjustable Laptop Stand",
-        PostedBy: "Taye",
-        price: "N130,000",
-        priceValue: 130000,
-        image: Product2,
-        isNew: false,
-        category: "Electronics",
-        condition: "like_new"
-    },
-    {
-        id: 3,
-        name: "Hydration Flask",
-        PostedBy: "Uma",
-        price: "N5,000",
-        priceValue: 5000,
-        image: Product3,
-        isNew: true,
-        category: "Kitchenware",
-        condition: "new"
-    },
-    {
-        id: 4,
-        name: "Electric Kettle",
-        PostedBy: "Kevin",
-        price: "N15,000",
-        priceValue: 15000,
-        image: Product4,
-        isNew: false,
-        category: "Kitchenware",
-        condition: "good"
-    },
-    {
-        id: 5,
-        name: "Product 5",
-        PostedBy: "Adaeze",
-        price: "N10,000",
-        priceValue: 10000,
-        image: Product5,
-        category: "Books",
-        condition: "fair"
-    },
-    {
-        id: 6,
-        name: "Product 6",
-        PostedBy: "Hendo",
-        price: "N10,000",
-        priceValue: 10000,
-        image: Product6,
-        category: "Furniture",
-        condition: "poor"
-    },
-    {
-        id: 7,
-        name: "Product 7",
-        PostedBy: "Jeff",
-        price: "N20,000",
-        priceValue: 20000,
-        image: Product7,
-        category: "Clothing",
-        condition: "new"
-    },
-    {
-        id: 8,
-        name: "Product 8",
-        PostedBy: "James",
-        price: "N24,000",
-        priceValue: 24000,
-        image: Product8,
-        category: "Electronics",
-        condition: "good"
-    },
-    {
-        id: 9,
-        name: "Product 9",
-        PostedBy: "Oma",
-        price: "N20,000",
-        priceValue: 20000,
-        image: Product9,
-        category: "Furniture",
-        condition: "like_new"
-    },
-    {
-        id: 10,
-        name: "Product 10",
-        PostedBy: "Big Oma",
-        price: "N27,000",
-        priceValue: 27000,
-        image: Product10,
-        category: "Electronics",
-        condition: "good"
-    },
-    {
-        id: 11,
-        name: "Product 11",
-        PostedBy: "Blessing",
-        price: "N60,000",
-        priceValue: 60000,
-        image: Product11,
-        category: "Kitchenware",
-        condition: "fair"
-    },
-    {
-        id: 12,
-        name: "Product 12",
-        PostedBy: "Williams",
-        price: "N45,000",
-        priceValue: 45000,
-        image: Product12,
-        category: "Clothing",
-        condition: "like_new"
-    },
-]
-
-const AllProducts = [
-    ...Products,
-    ...Products.map(p => ({ ...p, id: p.id + 12 })),
-    ...Products.map(p => ({ ...p, id: p.id + 24 })),
-]
+// Mock data removed. Using real TRPC queries.
 
 interface ProductProps {
   filters?: {
@@ -167,70 +26,25 @@ interface ProductProps {
 export default function Product({ filters, searchQuery }: ProductProps) {
      const containerRef = useRef<HTMLDivElement>(null)
     
-      const { 
-        data, 
-        fetchNextPage, 
-        hasNextPage, 
-        isFetchingNextPage, 
-        isLoading 
-      } = useInfiniteQuery({
-        queryKey: ['products', filters, searchQuery],
-        queryFn: async ({ pageParam = 0 }) => {
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          const itemsPerPage = 12
-          const start = pageParam as number
-          
-          let filtered = AllProducts;
-          
-          if (filters) {
-              filtered = filtered.filter(p => {
-                  const matchCategory = filters.category === 'All' || p.category === filters.category;
-                  const matchCondition = filters.condition === 'All' || p.condition === filters.condition;
-                  const matchPrice = p.priceValue >= filters.priceRange[0] && p.priceValue <= filters.priceRange[1];
-                  return matchCategory && matchCondition && matchPrice;
-              });
-          }
+  const { 
+    data, 
+    fetchNextPage, 
+    hasNextPage, 
+    isFetchingNextPage, 
+    isLoading 
+  } = trpc.product.list.useInfiniteQuery({
+    limit: 12,
+    search: searchQuery,
+    categoryId: filters?.category !== 'All' ? filters?.category : undefined,
+    condition: (filters?.condition !== 'All' ? filters?.condition : undefined) as ProductCondition,
+    minPrice: filters?.priceRange[0],
+    maxPrice: filters?.priceRange[1],
+  }, {
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    initialCursor: 0,
+  })
 
-          if (searchQuery) {
-              const lowerQuery = searchQuery.toLowerCase();
-              filtered = filtered.filter(p => 
-                  p.name.toLowerCase().includes(lowerQuery) || 
-                  p.PostedBy.toLowerCase().includes(lowerQuery)
-              );
-          }
-          
-          return filtered.slice(start, start + itemsPerPage)
-        },
-        initialPageParam: 0,
-        getNextPageParam: (lastPage, allPages) => {
-          const nextIndex = allPages.reduce((acc, page) => acc + page.length, 0)
-          
-          let filtered = AllProducts;
-          
-          if (filters) {
-              filtered = filtered.filter(p => {
-                  const matchCategory = filters.category === 'All' || p.category === filters.category;
-                  const matchCondition = filters.condition === 'All' || p.condition === filters.condition;
-                  const matchPrice = p.priceValue >= filters.priceRange[0] && p.priceValue <= filters.priceRange[1];
-                  return matchCategory && matchCondition && matchPrice;
-              });
-          }
-
-          if (searchQuery) {
-              const lowerQuery = searchQuery.toLowerCase();
-              filtered = filtered.filter(p => 
-                  p.name.toLowerCase().includes(lowerQuery) || 
-                  p.PostedBy.toLowerCase().includes(lowerQuery)
-              );
-          }
-
-          const totalCount = filtered.length;
-
-          return nextIndex < totalCount ? nextIndex : undefined
-        }
-      })
-    
-      const products = data?.pages.flat() || []
+  const products = data?.pages.flatMap(page => page.items) || []
 
       useGSAP(() => {
         if (!isLoading) {
@@ -264,13 +78,15 @@ export default function Product({ filters, searchQuery }: ProductProps) {
                 ) : (
                   products.map((product) => (
                   <Link href={`/product/${product.id}`} key={product.id} className='flex flex-col gap-4 group cursor-pointer product-card'>
-                    <div className="relative overflow-hidden rounded-[20px]">
+                    <div className="relative overflow-hidden rounded-[13px] ">
                       <Image 
-                          src={product.image} 
+                          src={product.images?.[0] || "/placeholder-product.png"} 
                           alt={product.name} 
+                          width={400}
+                          height={400}
                           className='w-full aspect-square object-cover transition-transform duration-500 group-hover:scale-110' 
                       />
-                      {product.isNew && (
+                      {product.condition === 'new' && (
                           <span className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full text-[14px] font-medium text-black">
                               New
                           </span>
@@ -278,8 +94,8 @@ export default function Product({ filters, searchQuery }: ProductProps) {
                     </div>
                     <div className="flex flex-col gap-1">
                       <h2 className='text-[18px] font-medium text-black'>{product.name}</h2>
-                      <p className='text-[16px] text-gray-500'>Posted by {product.PostedBy}</p>
-                      <p className='text-[16px] font-bold mt-1'>{product.price}</p>
+                      <p className='text-[16px] text-gray-500'>Posted by {product.store?.name || "Unknown Vendor"}</p>
+                      <p className='text-[16px] font-bold mt-1'>N{product.price.toLocaleString()}</p>
                     </div>
                   </Link>
                 )))}

@@ -54,9 +54,9 @@ export default function RoleSwitcher({ alignment = 'center' }: RoleSwitcherProps
         <div ref={containerRef} className="relative z-50">
             <Button 
                 onClick={() => setIsOpen(!isOpen)}
-                className='bg-[#9369FF] text-white w-[100px] h-[36px] rounded-full font-medium text-[16px] flex items-center justify-center gap-1 z-50 relative'
+                className='bg-[#FFA500] text-black hover:text-white hover:bg-black w-[100px] h-[36px] rounded-full font-medium text-[16px] flex items-center justify-center gap-1 z-50 relative'
             >
-                Buyer
+                Vendor
             </Button>
 
             <div 
@@ -70,9 +70,9 @@ export default function RoleSwitcher({ alignment = 'center' }: RoleSwitcherProps
             >
                 <div ref={contentRef} className="flex flex-col items-center gap-3 p-4 pb-6">
                     <div className="bg-[#E0E0E0] text-black px-4 py-2 rounded-full text-sm font-medium w-full text-center">
-                        Switch to vendor
+                        Switch to buyer
                     </div>
-                    <Link href="/dashboard/vendor" className="w-full">
+                    <Link href="/dashboard/buyer" className="w-full">
                         <Button className="bg-[#0A0A0A] text-white hover:bg-gray-800 w-full rounded-full h-[40px] font-medium">
                             Switch
                         </Button>

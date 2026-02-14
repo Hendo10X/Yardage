@@ -5,38 +5,33 @@ import { headers } from "next/headers";
 
 const f = createUploadthing();
 
-export const uploadRouter = {
+export const ourFileRouter = {
   productImage: f({
-    image: { maxFileSize: "4MB", maxFileCount: 10 },
+    image: {
+      maxFileSize: "4MB",
+      maxFileCount: 5,
+    },
   })
-    .middleware(async () => {
+  
+    .middleware(async ({ req }) => {
+      
       const session = await auth.api.getSession({
         headers: await headers(),
       });
 
+     
       if (!session) throw new UploadThingError("Unauthorized");
 
+      
       return { userId: session.user.id };
     })
-    .onUploadComplete(({ metadata, file }) => {
-      return { uploadedBy: metadata.userId, url: file.ufsUrl };
-    }),
+    .onUploadComplete(async ({ metadata, file }) => {
+     
+      console.log("Upload complete for userId:", metadata.userId);
+      console.log("file url", file.ufsUrl);
 
-  storeImage: f({
-    image: { maxFileSize: "4MB", maxFileCount: 1 },
-  })
-    .middleware(async () => {
-      const session = await auth.api.getSession({
-        headers: await headers(),
-      });
-
-      if (!session) throw new UploadThingError("Unauthorized");
-
-      return { userId: session.user.id };
-    })
-    .onUploadComplete(({ metadata, file }) => {
       return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
 } satisfies FileRouter;
 
-export type UploadRouter = typeof uploadRouter;
+export type OurFileRouter = typeof ourFileRouter;

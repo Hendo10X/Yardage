@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { and, eq, desc, count, inArray } from "drizzle-orm";
-import { router, protectedProcedure, sellerProcedure } from "../trpc";
+import { router, protectedProcedure, vendorProcedure } from "../trpc";
 import { db } from "../../db/drizzle";
 import { order, orderItem, product } from "../../db/schema";
 import { ProductStatus, OrderStatus } from "../enums";
@@ -130,7 +130,7 @@ export const orderRouter = router({
       };
     }),
 
-  listStoreOrders: sellerProcedure
+  listStoreOrders: vendorProcedure
     .input(
       z.object({
         page: z.number().int().min(1).default(1),
@@ -181,7 +181,7 @@ export const orderRouter = router({
       };
     }),
 
-  updateStatus: sellerProcedure
+  updateStatus: vendorProcedure
     .input(
       z.object({
         orderId: z.string(),

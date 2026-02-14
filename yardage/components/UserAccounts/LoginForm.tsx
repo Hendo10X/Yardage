@@ -32,14 +32,14 @@ export const LoginForm = () => {
         const { error } = await authClient.signIn.email({
           email: value.email,
           password: value.password,
-          callbackURL: "/dashboard",
+          callbackURL: "/dashboard/buyer",
         })
 
         if (error) {
           toast.error(error.message || "Invalid email or password.")
         } else {
           toast.success("Welcome back!")
-          router.push("/dashboard")
+          router.push("/dashboard/buyer")
           router.refresh()
         }
       })

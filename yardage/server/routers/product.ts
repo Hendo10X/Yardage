@@ -4,7 +4,7 @@ import {
   router,
   publicProcedure,
   protectedProcedure,
-  sellerProcedure,
+  vendorProcedure,
 } from "../trpc";
 import { db } from "../../db/drizzle";
 import { product, store } from "../../db/schema";
@@ -12,7 +12,7 @@ import { ProductCondition, ProductStatus, SortBy } from "../enums";
 import { notFound, forbidden, badRequest } from "../../lib/errors";
 
 export const productRouter = router({
-  create: sellerProcedure
+  create: vendorProcedure
     .input(
       z.object({
         name: z.string().min(2).max(200),
@@ -56,7 +56,7 @@ export const productRouter = router({
       return found;
     }),
 
-  update: sellerProcedure
+  update: vendorProcedure
     .input(
       z.object({
         id: z.string(),
@@ -97,7 +97,7 @@ export const productRouter = router({
   list: publicProcedure
     .input(
       z.object({
-        page: z.number().int().min(1).default(1),
+        cursor: z.number().nullish(), 
         limit: z.number().int().min(1).max(50).default(20),
         categoryId: z.string().optional(),
         storeId: z.string().optional(),
@@ -111,11 +111,13 @@ export const productRouter = router({
     .query(async ({ input }) => {
       const conditions = [eq(product.status, ProductStatus.ACTIVE)];
 
-      if (input.categoryId)
+      if (input.categoryId) {
         conditions.push(eq(product.categoryId, input.categoryId));
+      }
       if (input.storeId) conditions.push(eq(product.storeId, input.storeId));
-      if (input.condition)
+      if (input.condition) {
         conditions.push(eq(product.condition, input.condition));
+      }
       if (input.minPrice) conditions.push(gte(product.price, input.minPrice));
       if (input.maxPrice) conditions.push(lte(product.price, input.maxPrice));
       if (input.search)
@@ -130,26 +132,44 @@ export const productRouter = router({
         [SortBy.PRICE_DESC]: desc(product.price),
       };
 
-      const [items, [{ total }]] = await Promise.all([
-        db
-          .select()
-          .from(product)
-          .where(where)
-          .orderBy(sortMap[input.sort])
-          .limit(input.limit)
-          .offset((input.page - 1) * input.limit),
-        db.select({ total: count() }).from(product).where(where),
-      ]);
+      const limit = input.limit ?? 20;
+      const cursor = input.cursor ?? 0;
+
+      const items = await db
+        .select({
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          images: product.images,
+          condition: product.condition,
+          status: product.status,
+          createdAt: product.createdAt,
+          store: {
+            id: store.id,
+            name: store.name,
+          },
+        })
+        .from(product)
+        .leftJoin(store, eq(product.storeId, store.id))
+        .where(where)
+        .orderBy(sortMap[input.sort])
+        .limit(limit + 1)
+        .offset(cursor);
+
+      let nextCursor: typeof cursor | undefined = undefined;
+      if (items.length > limit) {
+        const nextItem = items.pop();
+        nextCursor = cursor + limit;
+      }
 
       return {
         items,
-        total,
-        page: input.page,
-        totalPages: Math.ceil(total / input.limit),
+        nextCursor,
       };
     }),
 
-  listMine: sellerProcedure
+  listMine: vendorProcedure
     .input(
       z.object({
         page: z.number().int().min(1).default(1),
@@ -182,4 +202,37 @@ export const productRouter = router({
         totalPages: Math.ceil(total / input.limit),
       };
     }),
+
+  getStashStats: vendorProcedure.query(async ({ ctx }) => {
+    const conditions = eq(product.storeId, ctx.store.id);
+
+    const [activeCount, soldCount, draftCount] = await Promise.all([
+      db
+        .select({ count: count() })
+        .from(product)
+        .where(and(conditions, eq(product.status, ProductStatus.ACTIVE))),
+      db
+        .select({ count: count() })
+        .from(product)
+        .where(and(conditions, eq(product.status, ProductStatus.SOLD))),
+      db
+        .select({ count: count() })
+        .from(product)
+        .where(and(conditions, eq(product.status, ProductStatus.DRAFT))),
+    ]);
+
+    const soldItems = await db
+      .select({ price: product.price })
+      .from(product)
+      .where(and(conditions, eq(product.status, ProductStatus.SOLD)));
+    
+    const totalEarned = soldItems.reduce((acc, item) => acc + item.price, 0);
+
+    return {
+      active: activeCount[0].count,
+      sold: soldCount[0].count,
+      draft: draftCount[0].count,
+      totalEarned,
+    };
+  }),
 });

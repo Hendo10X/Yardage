@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import superjson from "superjson";
 import { auth } from "../lib/auth";
 import { db } from "../db/drizzle";
+import * as schema from "../db/schema";
 import { store } from "../db/schema";
 
 export const createContext = async (opts: FetchCreateContextFnOptions) => {
@@ -43,21 +44,32 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
   return next({ ctx: { session: ctx.session, user: ctx.user } });
 });
 
-export const sellerProcedure = protectedProcedure.use(
+export const vendorProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
-    if (ctx.user.role !== "SELLER") {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "You must be a seller to perform this action",
-      });
-    }
-
+    // If user has a store, they are a vendor even if their role is still "USER"
     const [userStore] = await db
       .select()
       .from(store)
       .where(eq(store.userId, ctx.user.id))
       .limit(1);
 
-    return next({ ctx: { ...ctx, store: userStore ?? null } });
+    if (!userStore) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "You must create a store before you can post products",
+      });
+    }
+
+    // Sync role if it's not set correctly
+    if (ctx.user.role !== "SELLER") {
+      await db
+        .update(schema.user)
+        .set({ role: "SELLER" })
+        .where(eq(schema.user.id, ctx.user.id));
+      
+      ctx.user.role = "SELLER";
+    }
+
+    return next({ ctx: { ...ctx, store: userStore } });
   },
 );

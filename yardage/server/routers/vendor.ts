@@ -1,5 +1,5 @@
 import { and, eq, count, sql, inArray } from "drizzle-orm";
-import { router, protectedProcedure, sellerProcedure } from "../trpc";
+import { router, protectedProcedure, vendorProcedure } from "../trpc";
 import { db } from "../../db/drizzle";
 import { store, product, order, orderItem } from "../../db/schema";
 import { ProductStatus, OrderStatus } from "../enums";
@@ -15,10 +15,11 @@ export const vendorRouter = router({
     return {
       isVendor: !!userStore,
       store: userStore ?? null,
+      email: ctx.user.email,
     };
   }),
 
-  stats: sellerProcedure.query(async ({ ctx }) => {
+  stats: vendorProcedure.query(async ({ ctx }) => {
     const [
       [{ active }],
       [{ sold }],

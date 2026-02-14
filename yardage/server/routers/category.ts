@@ -36,7 +36,37 @@ export const categoryRouter = router({
     }),
 
   list: publicProcedure.query(async () => {
-    return db.select().from(category).orderBy(category.name);
+    const existing = await db.select().from(category).orderBy(category.name);
+    
+    if (existing.length === 0) {
+      const defaults = [
+        "Electronics",
+        "Furniture",
+        "Clothing",
+        "Books",
+        "Kitchen",
+        "Home Decor",
+        "Sports",
+        "Toys",
+        "Art",
+        "Other",
+      ];
+      
+      for (const name of defaults) {
+        try {
+          await db.insert(category).values({
+            name,
+            slug: generateSlug(name),
+            description: `Category for ${name}`,
+          });
+        } catch (e) {
+          
+        }
+      }
+      return db.select().from(category).orderBy(category.name);
+    }
+    
+    return existing;
   }),
 
   getById: publicProcedure

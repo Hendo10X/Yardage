@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { and, eq, or, desc, count } from "drizzle-orm";
-import { router, protectedProcedure, sellerProcedure } from "../trpc";
+import { router, protectedProcedure, vendorProcedure } from "../trpc";
 import { db } from "../../db/drizzle";
 import { conversation, message, product } from "../../db/schema";
 import { notFound, forbidden, badRequest } from "../../lib/errors";
@@ -213,7 +213,7 @@ export const messageRouter = router({
       };
     }),
 
-  listByProduct: sellerProcedure
+  listByProduct: vendorProcedure
     .input(
       z.object({
         productId: z.string(),
