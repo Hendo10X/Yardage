@@ -45,9 +45,9 @@ export const SignupForm = () => {
         })
 
         if (error) {
-          toast.error(error.message || "Something went wrong during signup.")
+          toast.error(error.message || "Signup failed. Please try again.")
         } else {
-          toast.success("Account created successfully! Please login.")
+          toast.success("Account created! You can now log in.")
           router.push("/login")
         }
       })

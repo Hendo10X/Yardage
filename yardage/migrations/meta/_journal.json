@@ -29,6 +29,13 @@
       "when": 1770748153803,
       "tag": "0003_ambiguous_paibok",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1771155355179,
+      "tag": "0004_majestic_roughhouse",
+      "breakpoints": true
     }
   ]
 }

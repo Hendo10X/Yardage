@@ -1,12 +1,13 @@
 import { router } from "../trpc";
-import { storeRouter } from "./store";
 import { productRouter } from "./product";
+import { wishlistRouter } from "./wishlist";
+import { authRouter } from "./auth";
+import { storeRouter } from "./store";
 import { categoryRouter } from "./category";
 import { orderRouter } from "./order";
 import { reviewRouter } from "./review";
 import { vendorRouter } from "./vendor";
 import { messageRouter } from "./message";
-import { authRouter } from "./auth";
 import { userRouter } from "./user";
 
 export const appRouter = router({
@@ -19,6 +20,7 @@ export const appRouter = router({
   vendor: vendorRouter,
   message: messageRouter,
   user: userRouter,
+  wishlist: wishlistRouter,
 });
 
 export type AppRouter = typeof appRouter;

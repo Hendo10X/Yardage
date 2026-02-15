@@ -8,6 +8,7 @@ import gsap from "gsap"
 import RoleSwitcher from "./RoleSwitcher"
 import { authClient } from "@/lib/auth-client"
 import Image from "next/image"
+import { usePathname } from "next/navigation"
 
 interface MobileMenuProps {
     isOpen: boolean
@@ -16,9 +17,12 @@ interface MobileMenuProps {
 
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     const { data: session } = authClient.useSession()
+    const pathname = usePathname()
     const menuRef = useRef<HTMLDivElement>(null)
     const linksRef = useRef<HTMLUListElement>(null)
     const actionsRef = useRef<HTMLDivElement>(null)
+
+    const isActive = (path: string) => pathname === path
 
     useEffect(() => {
         if (isOpen) {
@@ -70,19 +74,31 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         >
             <div className="flex justify-end mb-8">
                 <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
-                    <X className="h-20 w-20 text-black" />
+                    <X className="h-10 w-10 text-black" />
                 </Button>
             </div>
 
             <div className="flex flex-col h-full justify-between">
                 <ul ref={linksRef} className="flex flex-col gap-6">
-                    <Link href="" className="text-4xl font-light text-black hover:text-[#9369FF] transition-colors" onClick={onClose}>
+                    <Link 
+                        href="/dashboard/buyer" 
+                        className={`text-4xl font-light transition-colors ${isActive('/dashboard/buyer') ? 'text-[#9369FF] font-medium' : 'text-black'}`} 
+                        onClick={onClose}
+                    >
                         Explore
                     </Link>
-                    <Link href="" className="text-4xl font-light text-black hover:text-[#9369FF] transition-colors" onClick={onClose}>
+                    <Link 
+                        href="/dashboard/buyer/category" 
+                        className={`text-4xl font-light transition-colors ${isActive('/dashboard/buyer/category') ? 'text-[#9369FF] font-medium' : 'text-black'}`} 
+                        onClick={onClose}
+                    >
                         Categories
                     </Link>
-                    <Link href="" className="text-4xl font-light text-black hover:text-[#9369FF] transition-colors" onClick={onClose}>
+                    <Link 
+                        href="/dashboard/buyer/wishlist" 
+                        className={`text-4xl font-light transition-colors ${isActive('/dashboard/buyer/wishlist') ? 'text-[#9369FF] font-medium' : 'text-black'}`} 
+                        onClick={onClose}
+                    >
                         Wishlist
                     </Link>
                 </ul>

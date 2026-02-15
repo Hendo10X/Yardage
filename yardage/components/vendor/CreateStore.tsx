@@ -15,7 +15,7 @@ export default function CreateStore() {
   
   const utils = trpc.useUtils()
   
-  const { startUpload } = useUploadThing('productImage', { // Using productImage since it's already configured
+  const { startUpload } = useUploadThing('productImage', { 
     onUploadError: (error) => {
       toast.error(`Upload error: ${error.message}`)
     },
@@ -27,7 +27,7 @@ export default function CreateStore() {
       utils.vendor.checkStatus.invalidate()
     },
     onError: (error) => {
-      toast.error(error.message || 'Failed to create store')
+      toast.error(error.message || "Store creation failed. Please try again.")
     }
   })
 

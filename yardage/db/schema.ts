@@ -188,6 +188,26 @@ export const product = pgTable(
   ],
 );
 
+export const wishlist = pgTable(
+  "wishlist",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    productId: text("product_id")
+      .notNull()
+      .references(() => product.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("wishlist_user_product_idx").on(table.userId, table.productId),
+    index("wishlist_userId_idx").on(table.userId),
+  ],
+);
+
 export const order = pgTable(
   "orders",
   {
@@ -328,6 +348,7 @@ export const userRelations = relations(user, ({ many }) => ({
     relationName: "sellerConversations",
   }),
   sentMessages: many(message, { relationName: "sentMessages" }),
+  wishlist: many(wishlist),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -363,6 +384,7 @@ export const productRelations = relations(product, ({ one, many }) => ({
   }),
   reviews: many(review),
   conversations: many(conversation),
+  wishlistedBy: many(wishlist),
 }));
 
 export const orderRelations = relations(order, ({ one, many }) => ({
@@ -422,5 +444,13 @@ export const messageRelations = relations(message, ({ one }) => ({
     fields: [message.senderId],
     references: [user.id],
     relationName: "sentMessages",
+  }),
+}));
+
+export const wishlistRelations = relations(wishlist, ({ one }) => ({
+  user: one(user, { fields: [wishlist.userId], references: [user.id] }),
+  product: one(product, {
+    fields: [wishlist.productId],
+    references: [product.id],
   }),
 }));

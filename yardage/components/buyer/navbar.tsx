@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Logo from "@/images/Logo.svg"
 import { Button } from '../ui/button'
 import { Menu, Search } from 'lucide-react'
-
+import { usePathname } from 'next/navigation'
 import RoleSwitcher from './RoleSwitcher'
 import MobileMenu from './MobileMenu'
 import UserDropdown from '../UserDropdown'
@@ -19,16 +19,36 @@ interface NavbarProps {
 
 export default function Navbar({ onFilterClick, onSearch }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const pathname = usePathname()
+
+  const isActive = (path: string) => pathname === path
 
   return (
     <nav className='px-6 lg:px-20 py-6 lg:py-10 relative'>
         <div className='flex items-center justify-between'>
             <div className='flex items-center gap-20'>
+                <Link href="/dashboard/buyer" className='' >
                 <Image src={Logo} alt="YardageLogo" width={100} height={100} className="w-[80px] h-auto lg:w-[100px]" />
+                </Link>
                 <ul className='hidden lg:flex items-center gap-6'>
-                    <Link href="/dashboard" className='bg-[#F0F0F0] px-6 py-2 rounded-full text-[16px] font-medium' >Explore</Link>
-                    <Link href="" className='text-[16px] font-normal' >Categories</Link>
-                    <Link href="" className='text-[16px] font-normal' >Wishlist</Link>
+                    <Link 
+                        href="/dashboard/buyer" 
+                        className={`${isActive('/dashboard/buyer') ? 'bg-[#F0F0F0] font-medium' : 'font-normal'} px-6 py-2 rounded-full text-[16px] transition-all`} 
+                    >
+                        Explore
+                    </Link>
+                    <Link 
+                        href="/dashboard/buyer/category" 
+                        className={`${isActive('/dashboard/buyer/category') ? 'bg-[#F0F0F0] font-medium' : 'font-normal'} px-6 py-2 rounded-full text-[16px] transition-all`} 
+                    >
+                        Categories
+                    </Link>
+                    <Link 
+                        href="/dashboard/buyer/wishlist" 
+                        className={`${isActive('/dashboard/buyer/wishlist') ? 'bg-[#F0F0F0] font-medium' : 'font-normal'} px-6 py-2 rounded-full text-[16px] transition-all`} 
+                    >
+                        Wishlist
+                    </Link>
                 </ul>
             </div>
 

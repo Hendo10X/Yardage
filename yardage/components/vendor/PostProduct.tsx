@@ -22,13 +22,13 @@ export default function PostProduct() {
 
   const createProduct = trpc.product.create.useMutation({
     onSuccess: () => {
-      toast.success('Product posted successfully!')
+      toast.success("Product posted! It's now live on the marketplace.")
       utils.product.list.invalidate()
       router.push('/dashboard/vendor')
     },
     onError: (error) => {
       console.error('Submission error:', error)
-      toast.error(error.message || 'Failed to post product')
+      toast.error(error.message || "Post failed. Please verify your product details.")
     }
   })
 

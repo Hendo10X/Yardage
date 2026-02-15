@@ -9,6 +9,8 @@ import { Filters } from "@/types/filters"
 import { trpc } from "@/lib/trpc"
 import { ProductCondition } from "@/server/enums"
 
+import { toast } from "sonner"
+
 interface FilterDrawerProps {
     isOpen: boolean
     onClose: () => void
@@ -23,7 +25,6 @@ export default function FilterDrawer({ isOpen, onClose, filters, onApplyFilters 
 
     const { data: categoriesData } = trpc.category.list.useQuery()
 
-    // Consolidate categories and conditions
     const categories = ["All", ...(categoriesData?.map(c => c.name) || [])]
     const conditions: string[] = ["All", ...Object.values(ProductCondition)]
 
@@ -34,7 +35,6 @@ export default function FilterDrawer({ isOpen, onClose, filters, onApplyFilters 
 
     useGSAP(() => {
         if (isOpen) {
-            // Force display block before animating opacity
             gsap.set(overlayRef.current, { display: "block" })
             gsap.to(overlayRef.current, { 
                 opacity: 1, 
@@ -65,6 +65,7 @@ export default function FilterDrawer({ isOpen, onClose, filters, onApplyFilters 
 
     const handleApply = () => {
         onApplyFilters(localFilters)
+        toast.success("Filters applied successfully.")
         onClose()
     }
 
@@ -76,6 +77,7 @@ export default function FilterDrawer({ isOpen, onClose, filters, onApplyFilters 
         }
         setLocalFilters(resetFilters)
         onApplyFilters(resetFilters)
+        toast.success("Filters have been reset.")
         onClose()
     }
 

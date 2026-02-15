@@ -21,7 +21,7 @@ export default function ProductPage() {
   
   const createOrder = trpc.order.create.useMutation({
     onSuccess: (order) => {
-      toast.success("Order placed successfully!")
+      toast.success("Order placed successfully! Check your dashboard for details.")
       router.push(`/dashboard/buyer/orders/${order?.id}`)
     },
     onError: (err) => {
@@ -31,6 +31,21 @@ export default function ProductPage() {
       } else {
         toast.error(err.message || "Failed to place order")
       }
+    }
+  })
+
+  const { data: isWishlisted, refetch: refetchWishlist } = trpc.wishlist.check.useQuery(
+    { productId },
+    { enabled: !!productId }
+  )
+
+  const toggleWishlist = trpc.wishlist.toggle.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.added ? "Added to your wishlist!" : "Removed from your wishlist.")
+      refetchWishlist()
+    },
+    onError: (err) => {
+      toast.error(err.message || "Action failed. Please try again later.")
     }
   })
 
@@ -67,6 +82,10 @@ export default function ProductPage() {
     await createOrder.mutateAsync({
       items: [{ productId: product.id, quantity: 1 }]
     })
+  }
+
+  const handleWishlist = () => {
+    toggleWishlist.mutate({ productId })
   }
 
   return (
@@ -143,10 +162,15 @@ export default function ProductPage() {
                 <div className="flex flex-col gap-4 max-w-[400px]">
                     <Button 
                         variant="secondary" 
-                        onClick={() => toast.success("Added to wishlist!")}
-                        className="w-full h-[56px] rounded-full text-[16px] font-medium bg-[#F0F0F0] hover:bg-[#E0E0E0] text-black"
+                        onClick={handleWishlist}
+                        disabled={toggleWishlist.isPending}
+                        className={`w-full h-[56px] rounded-full text-[16px] font-medium transition-all ${
+                          isWishlisted 
+                            ? "bg-[#9369FF] text-white hover:bg-[#8254ff]" 
+                            : "bg-[#F0F0F0] hover:bg-[#E0E0E0] text-black"
+                        }`}
                     >
-                        Add to wishlist
+                        {toggleWishlist.isPending ? "Updating..." : isWishlisted ? "In Wishlist" : "Add to wishlist"}
                     </Button>
                     <Button 
                         variant="secondary"

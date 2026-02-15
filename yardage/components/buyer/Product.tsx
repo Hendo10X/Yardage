@@ -12,8 +12,6 @@ import gsap from "gsap"
 import { trpc } from '@/lib/trpc'
 import { ProductCondition } from '@/server/enums'
 
-// Mock data removed. Using real TRPC queries.
-
 interface ProductProps {
   filters?: {
     category: string;
@@ -45,19 +43,6 @@ export default function Product({ filters, searchQuery }: ProductProps) {
   })
 
   const products = data?.pages.flatMap(page => page.items) || []
-
-      useGSAP(() => {
-        if (!isLoading) {
-          gsap.from(".product-card", {
-            y: 20,
-            opacity: 0,
-            duration: 0.5,
-            stagger: 0.1,
-            ease: "power2.out"
-          })
-        }
-      }, { scope: containerRef, dependencies: [isLoading] })
-
   return (
       <div className='' ref={containerRef}>
           <div className='px-6 lg:px-20 py-6 lg:py-10'>

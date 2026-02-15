@@ -36,9 +36,9 @@ export const LoginForm = () => {
         })
 
         if (error) {
-          toast.error(error.message || "Invalid email or password.")
+          toast.error(error.message || "Login failed. Please check your credentials and try again.")
         } else {
-          toast.success("Welcome back!")
+          toast.success("Successfully logged in. Welcome back!")
           router.push("/dashboard/buyer")
           router.refresh()
         }
