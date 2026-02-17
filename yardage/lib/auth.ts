@@ -29,7 +29,11 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-    autoSignIn: true,
+    autoSignIn: false,
+  },
+  session: {
+    expiresIn: 60 * 60 * 10,
+    updateAge: 60 * 30, 
   },
   hooks: {
   before: createAuthMiddleware(async (ctx) => {

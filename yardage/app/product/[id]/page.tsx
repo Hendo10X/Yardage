@@ -1,14 +1,15 @@
 "use client"
 
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import Navbar from "@/components/buyer/navbar"
-import { Footer } from "@/components/Footer"
+import Footer from "@/components/Footer"
 import { useParams, useRouter } from 'next/navigation'
 import { trpc } from '@/lib/trpc'
-import { Loader2, Package } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Package } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function ProductPage() {
@@ -48,18 +49,46 @@ export default function ProductPage() {
       toast.error(err.message || "Action failed. Please try again later.")
     }
   })
-
-  // Update selected image when product data arrives
-  useEffect(() => {
-    if (product?.images?.length) {
-      setSelectedImage(product.images[0])
-    }
-  }, [product])
+ 
+  const displayImage = selectedImage || (product?.images?.[0] ?? null)
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#FDFBFF] flex items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-[#8E74FF]" />
+      <div className="min-h-screen bg-[#FDFBFF]">
+        <Navbar />
+        <div className="px-6 lg:px-20 py-6 lg:py-10 max-w-[1400px] mx-auto lg:h-[140vh]">
+          <div className="flex flex-col lg:flex-row gap-12 lg:gap-20">
+            {/* Left Column: Image Skeleton */}
+            <div className="w-full lg:w-1/2">
+              <Skeleton className="aspect-square w-full rounded-[20px]" />
+            </div>
+
+            {/* Right Column: Details Skeleton */}
+            <div className="w-full lg:w-1/2 flex flex-col pt-4 space-y-8">
+              <div className="space-y-4">
+                <Skeleton className="h-12 w-3/4 rounded-lg" />
+                <Skeleton className="h-6 w-1/4 rounded-lg" />
+              </div>
+              <div className="space-y-4">
+                <Skeleton className="h-32 w-full rounded-lg" />
+                <div className="flex gap-4">
+                  <Skeleton className="h-6 w-24 rounded-lg" />
+                  <Skeleton className="h-6 w-24 rounded-lg" />
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <Skeleton className="h-20 w-20 rounded-lg" />
+                <Skeleton className="h-20 w-20 rounded-lg" />
+              </div>
+              <div className="space-y-4 max-w-[400px]">
+                <Skeleton className="h-[56px] w-full rounded-full" />
+                <Skeleton className="h-[56px] w-full rounded-full" />
+                <Skeleton className="h-[56px] w-full rounded-full" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
       </div>
     )
   }
@@ -96,9 +125,9 @@ export default function ProductPage() {
             {/* Left Column - Main Image */}
             <div className="w-full lg:w-1/2">
                 <div className="relative aspect-square w-full bg-[#E5E5E5] rounded-[20px] overflow-hidden">
-                    {selectedImage ? (
+                    {displayImage ? (
                       <Image 
-                          src={selectedImage} 
+                          src={displayImage} 
                           alt={product.name} 
                           fill
                           className="object-cover transition-all duration-300"
@@ -114,26 +143,26 @@ export default function ProductPage() {
 
             {/* Right Column - Details */}
             <div className="w-full lg:w-1/2 flex flex-col pt-4">
-                <h1 className="text-[48px] leading-[1.1] font-medium text-black mb-4">
+                <h1 className="text-[40px] leading-[1.1] font-medium text-black mb-4">
                     {product.name}
                 </h1>
 
                 <div className="flex items-center gap-4 mb-8">
-                    <p className="text-[18px] text-[#666666]">Posted by {product.store.name}</p>
-                    <Link href="#" className="text-[18px] text-[#9369FF] hover:underline">
+                    <p className="text-[14px] text-[#666666]">Posted by {product.store.name}</p>
+                    <Link href="#" className="text-[14px] text-[#9369FF] hover:underline">
                         Visit profile
                     </Link>
                 </div>
 
-                <div className="space-y-6 text-[18px] leading-[1.6] text-[#1A1A1A] mb-8">
+                <div className="space-y-6 text-[14px] md:text-[18px] leading-[1.6] text-[#1A1A1A] mb-8">
                     <p className="whitespace-pre-wrap">
                         {product.description || "No description provided."}
                     </p>
                 </div>
 
                 <div className="space-y-2 mb-10">
-                    <p className="text-[18px] font-medium uppercase tracking-tight text-[#666666]">Condition: <span className="text-black capitalize">{product.condition.replace('_', ' ')}</span></p>
-                    <p className="text-[18px] font-medium uppercase tracking-tight text-[#666666]">Category: <span className="text-black">{product.category?.name || 'Uncategorized'}</span></p>
+                    <p className="text-[14px] md:text-[16px] font-medium tracking-tight text-[#666666]">Condition: <span className="text-black capitalize">{product.condition.replace('_', ' ')}</span></p>
+                    <p className="text-[14px] md:text-[16px] font-medium tracking-tight text-[#666666]">Category: <span className="text-black">{product.category?.name || 'Uncategorized'}</span></p>
                 </div>
 
                 {/* Thumbnails */}
@@ -143,8 +172,8 @@ export default function ProductPage() {
                           <div 
                               key={index} 
                               onClick={() => setSelectedImage(img)}
-                              className={`relative flex-shrink-0 w-[80px] h-[80px] rounded-lg overflow-hidden cursor-pointer transition-all duration-200 ${
-                                  selectedImage === img ? 'ring-2 ring-[#9369FF]' : 'opacity-60 hover:opacity-100'
+                              className={`relative shrink-0 w-[80px] h-[80px] rounded-lg overflow-hidden cursor-pointer transition-all duration-200 ${
+                                  displayImage === img ? 'ring-2 ring-[#9369FF]' : 'opacity-60 hover:opacity-100'
                               }`}
                           >
                               <Image 

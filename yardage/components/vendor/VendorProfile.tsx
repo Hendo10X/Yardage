@@ -3,7 +3,8 @@
 import React from 'react'
 import Image from 'next/image'
 import { trpc } from '@/lib/trpc'
-import { Loader2, Mail, MapPin, Package } from 'lucide-react'
+import { Skeleton } from '../ui/skeleton'
+import { Package } from 'lucide-react'
 import CreateStore from './CreateStore'
 
 export default function VendorProfile() {
@@ -33,8 +34,34 @@ export default function VendorProfile() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-[#8E74FF]" />
+      <div className="max-w-[1200px] mx-auto px-6 py-12 flex flex-col items-center">
+        {/* Profile Header Skeleton */}
+        <div className="flex flex-col items-center gap-6 mb-20 text-center">
+          <Skeleton className="w-32 h-32 rounded-full" />
+          <div className="space-y-2 flex flex-col items-center">
+            <Skeleton className="h-10 w-48 rounded-lg" />
+            <Skeleton className="h-6 w-32 rounded-lg" />
+          </div>
+        </div>
+
+        {/* Reviews Skeleton */}
+        <div className="w-full mb-20">
+          <Skeleton className="h-8 w-40 rounded-lg mb-8" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Skeleton className="h-[180px] w-full rounded-[24px]" />
+            <Skeleton className="h-[180px] w-full rounded-[24px]" />
+          </div>
+        </div>
+
+        {/* Products Skeleton */}
+        <div className="w-full">
+          <Skeleton className="h-8 w-48 rounded-lg mb-8" />
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+            <Skeleton className="aspect-square rounded-[32px]" />
+            <Skeleton className="aspect-square rounded-[32px]" />
+            <Skeleton className="aspect-square rounded-[32px]" />
+          </div>
+        </div>
       </div>
     )
   }
@@ -60,18 +87,18 @@ export default function VendorProfile() {
         </div>
         
         <div>
-          <h1 className="text-[40px] font-bold text-[#140033] mb-1">{store?.name}</h1>
-          <p className="text-[18px] text-[#140033]/40 font-medium">{status?.email}</p>
+          <h1 className="text-[25px] md:text-[40px] font-bold text-[#140033] mb-1">{store?.name}</h1>
+          <p className="text-[15px] md:text-[18px] text-[#140033]/40 font-medium">{status?.email}</p>
         </div>
       </div>
 
       {/* Top Reviews Section */}
       <div className="w-full mb-20">
-        <h2 className="text-[28px] font-bold text-[#140033] mb-8">Top reviews</h2>
+        <h2 className="text-[20px] lg:text-[28px] font-bold text-[#140033] mb-8">Top reviews</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {reviews.map((review) => (
             <div key={review.id} className="bg-[#EDEDED] p-8 rounded-[24px] flex flex-col justify-between min-h-[180px]">
-              <p className="text-[18px] text-[#140033] font-normal leading-relaxed opacity-80">
+              <p className="text-[15px] md:text-[18px] text-[#140033] font-normal leading-relaxed opacity-80">
                 {review.text}
               </p>
               <div className="flex justify-between items-center mt-6">
@@ -85,7 +112,7 @@ export default function VendorProfile() {
 
       {/* Item Sold Section */}
       <div className="w-full">
-        <h2 className="text-[28px] font-bold text-[#140033] mb-8 text-left w-full">
+        <h2 className="text-[20px] lg:text-[28px] font-bold text-[#140033] mb-8 text-left w-full">
           Item sold({products?.total || 0})
         </h2>
         

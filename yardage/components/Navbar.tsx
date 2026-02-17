@@ -5,9 +5,10 @@ import Logo from "@/images/Logo.svg"
 import Image from "next/image"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
+import MobileNav from './MobileNav'
 import { Button } from './ui/button'
 
-export const Navbar = () => {
+export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
@@ -46,25 +47,7 @@ export const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Menu Overlay */}
-      <div className={`
-        fixed inset-0 bg-background/95 backdrop-blur-md z-40 transition-all duration-300 md:hidden
-        ${isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}
-      `}>
-        <div className="flex flex-col items-center bg-[#ede7e7] justify-center h-full gap-8 p-6 text-center">
-          <Link href="/" onClick={toggleMenu} className="text-[18px] font-medium">About us</Link>
-          <Link href="/faq" onClick={toggleMenu} className="text-[18px] font-medium">FAQ</Link>
-          <Link href="/how-it-works" onClick={toggleMenu} className="text-[18px] font-medium">How it works</Link>
-          <div className="flex flex-col gap-4 w-full mt-4">
-            <Link href="/login" onClick={toggleMenu} className="text-[18px] font-medium">Login</Link>
-            <Button className='cursor-pointer bg-primary text-primary-foreground px-4 py-2 rounded-full text-[18px] font-medium'>
-              <Link href="/signup" onClick={toggleMenu} className="">
-                Sign up
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
+      <MobileNav isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </nav>
   )
 }

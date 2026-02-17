@@ -13,7 +13,7 @@ export default function Wishlist() {
   return (
     <div className="px-6 lg:px-20 py-6 lg:py-10">
         <div>
-            <h1 className="lg:text-[57px] text-[40px] font-bold mb-12">Wishlist</h1>
+            <h1 className="lg:text-[50px] text-[40px] font-medium mb-12">Wishlist</h1>
         </div>
 
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-12'>

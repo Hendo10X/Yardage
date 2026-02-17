@@ -75,7 +75,7 @@ export default function Category() {
   return (
     <div className="px-6 lg:px-20 py-6 lg:py-10">
         <div>
-            <h2 className="lg:text-[57px] text-[40px]  font-bold">Categories</h2>
+            <h2 className="lg:text-[50px] text-[40px]  font-medium">Categories</h2>
         </div>
 
         <div className="py-4 lg:py-10">

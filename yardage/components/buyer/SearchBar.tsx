@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import { Search, X } from "lucide-react"
 import gsap from "gsap"
+import { useGSAP } from "@gsap/react"
 
 interface SearchBarProps {
     onSearch?: (query: string) => void
@@ -14,7 +15,7 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
     const inputRef = useRef<HTMLInputElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
 
-    useEffect(() => {
+    useGSAP(() => {
         if (isExpanded) {
             gsap.to(containerRef.current, {
                 width: "300px",

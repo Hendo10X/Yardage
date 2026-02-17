@@ -4,6 +4,7 @@ import { trpc } from '@/lib/trpc'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronDown } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function ActiveItems() {
   const { data, isLoading } = trpc.product.listMine.useQuery({
@@ -14,14 +15,14 @@ export default function ActiveItems() {
 
   return (
     <div className='py-12'>
-        <h1 className='text-[32px] font-bold mb-10 text-black'>Active items</h1>
+        <h1 className='text-[18px] md:text-[32px] font-bold mb-10 text-black'>Active items</h1>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12'>
             {isLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className='flex flex-col gap-4 animate-pulse'>
-                        <div className="w-full aspect-[4/3] bg-gray-200 rounded-[28px]" />
-                        <div className="h-6 bg-gray-200 rounded-md w-3/4" />
-                        <div className="h-5 bg-gray-200 rounded-md w-1/4" />
+                    <div key={i} className='flex flex-col gap-4'>
+                        <Skeleton className="w-full aspect-[4/3] rounded-[28px]" />
+                        <Skeleton className="h-6 rounded-md w-3/4" />
+                        <Skeleton className="h-5 rounded-md w-1/4" />
                     </div>
                 ))
             ) : (

@@ -1,13 +1,16 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef } from "react"
 import Link from "next/link"
 import { X, Search } from "lucide-react"
 import { Button } from "../ui/button"
 import gsap from "gsap"
+import { useGSAP } from "@gsap/react"
 import RoleSwitcher from "./Roleswitcher"
 import { authClient } from "@/lib/auth-client"
 import Image from "next/image"
+
+import { usePathname } from "next/navigation"
 
 interface MobileMenuProps {
     isOpen: boolean
@@ -16,11 +19,19 @@ interface MobileMenuProps {
 
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     const { data: session } = authClient.useSession()
+    const pathname = usePathname()
     const menuRef = useRef<HTMLDivElement>(null)
     const linksRef = useRef<HTMLUListElement>(null)
     const actionsRef = useRef<HTMLDivElement>(null)
 
-    useEffect(() => {
+    const navLinks = [
+        { name: 'My stash', href: '/dashboard/vendor' },
+        { name: 'Inbox', href: '/dashboard/vendor/inbox' },
+        { name: 'Posts', href: '/dashboard/vendor/posts' },
+        { name: 'Profile', href: '/dashboard/vendor/profile' },
+    ]
+
+    useGSAP(() => {
         if (isOpen) {
             gsap.to(menuRef.current, {
                 x: 0,
@@ -70,24 +81,32 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         >
             <div className="flex justify-end mb-8">
                 <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
-                    <X className="h-20 w-20 text-black" />
+                    <X size={70} strokeWidth={3.5} className="text-black" />
                 </Button>
             </div>
 
             <div className="flex flex-col h-full justify-between">
                 <ul ref={linksRef} className="flex flex-col gap-6">
-                    <Link href="" className="text-4xl font-light text-black hover:text-[#9369FF] transition-colors" onClick={onClose}>
-                        My stash
-                    </Link>
-                    <Link href="" className="text-4xl font-light text-black hover:text-[#9369FF] transition-colors" onClick={onClose}>
-                        Inbox
-                    </Link>
-                    <Link href="" className="text-4xl font-light text-black hover:text-[#9369FF] transition-colors" onClick={onClose}>
-                        Posts
-                    </Link>
-                    <Link href="" className="text-4xl font-light text-black hover:text-[#9369FF] transition-colors" onClick={onClose}>
-                        Profile
-                    </Link>
+                    {navLinks.map((link: { name: string; href: string }) => {
+                        const isActive = link.href === '/dashboard/vendor'
+                            ? pathname === '/dashboard/vendor' || pathname === '/dashboard/vendor/stash'
+                            : pathname.startsWith(link.href);
+
+                        return (
+                            <Link 
+                                key={link.href}
+                                href={link.href} 
+                                className={`text-4xl transition-colors ${
+                                    isActive 
+                                        ? 'text-[#9369FF] font-medium' 
+                                        : 'font-light text-black hover:text-[#9369FF]'
+                                }`}
+                                onClick={onClose}
+                            >
+                                {link.name}
+                            </Link>
+                        )
+                    })}
                 </ul>
 
                 <div ref={actionsRef} className="flex flex-col gap-6 pb-10">

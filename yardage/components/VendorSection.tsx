@@ -14,7 +14,7 @@ export const VendorSection = () => {
                     <span> new stuffs, sign-up or login now</span>
                 </p>
                 <Button className='text-white rounded-full px-6 py-2 text-[18px]'>
-                    <Link href="#">
+                    <Link href="/login">
                         Get Started
                     </Link>
                 </Button>
@@ -27,7 +27,7 @@ export const VendorSection = () => {
                    <span>while, join now</span>
                 </p>
                 <Button className='text-white  bg-[#9369FF] rounded-full px-6 py-2 text-[18px]'>
-                    <Link href="#">
+                    <Link href="/login">
                         Get Started
                     </Link>
                 </Button>

@@ -5,6 +5,7 @@ import { Plus, ChevronDown, Loader2, X } from 'lucide-react'
 import { trpc } from '@/lib/trpc'
 import { useUploadThing } from '@/lib/uploadthing'
 import { useForm } from '@tanstack/react-form'
+import { Skeleton } from '../ui/skeleton'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -100,8 +101,30 @@ export default function PostProduct() {
 
   if (isLoadingStatus) {
     return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-[#8E74FF]" />
+      <div className="min-h-screen bg-[#FBF9FF] pb-20">
+        <div className="lg:max-w-[1000px] max-w-[500px] mx-auto px-2 py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            {/* Left Column: Images Skeleton */}
+            <div className="space-y-8">
+              <Skeleton className="w-[300px] h-[300px] md:w-[444px] md:h-[416px] rounded-lg" />
+              <div className="grid grid-cols-4 gap-4">
+                <Skeleton className="aspect-square rounded-lg" />
+                <Skeleton className="aspect-square rounded-lg" />
+                <Skeleton className="aspect-square rounded-lg" />
+                <Skeleton className="aspect-square rounded-lg" />
+              </div>
+            </div>
+
+            {/* Right Column: Form Skeleton */}
+            <div className="space-y-6 pt-2">
+              <Skeleton className="w-full h-[50px] md:h-[72px] rounded-[49px]" />
+              <Skeleton className="w-full h-[50px] md:h-[72px] rounded-[49px]" />
+              <Skeleton className="w-full h-[150px] md:h-[185px] rounded-[22px]" />
+              <Skeleton className="w-full h-[50px] md:h-[72px] rounded-[49px]" />
+              <Skeleton className="w-full h-[50px] md:h-[72px] rounded-[49px] mt-4" />
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
@@ -167,7 +190,7 @@ export default function PostProduct() {
 
   return (
     <div className="min-h-screen bg-[#FBF9FF] pb-20">
-      <div className="max-w-[1200px] mx-auto px-6 py-10">
+      <div className="lg:max-w-[1000px] max-w-[500px] mx-auto px-2 py-10 flex flex-col items-center justify-center">
         <form 
           onSubmit={(e) => {
             e.preventDefault()
@@ -180,7 +203,7 @@ export default function PostProduct() {
           <div className="space-y-8">
             <div className="flex flex-col items-center gap-4">
               {/* Main Large Image */}
-              <div className="w-full aspect-square bg-white border-2 border-dashed border-[#E5E0FF] rounded-[24px] relative overflow-hidden group flex items-center justify-center">
+              <div className="w-[300px] h-[300px] md:w-[444px] md:h-[416px] bg-white border-2 border-dashed border-[#817F7F] relative overflow-hidden group flex items-center justify-center">
                 {previews[0] ? (
                   <>
                     <Image src={previews[0]} alt="Main product" fill className="object-cover" />
@@ -205,7 +228,7 @@ export default function PostProduct() {
             {/* Supplementary Images Grid */}
             <div className="grid grid-cols-4 gap-4">
               {[1, 2, 3, 4].map((idx) => (
-                <div key={idx} className="aspect-square bg-white border-2 border-dashed border-[#E5E0FF] rounded-[16px] relative overflow-hidden group flex items-center justify-center">
+                <div key={idx} className="aspect-square bg-white border-2 border-dashed border-[#817F7F] relative overflow-hidden group flex items-center justify-center">
                   {previews[idx] ? (
                     <>
                       <Image src={previews[idx]!} alt={`Product preview ${idx}`} fill className="object-cover" />
@@ -237,7 +260,7 @@ export default function PostProduct() {
                     id="title"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    className="w-full bg-[#EDEDED] rounded-[24px] px-8 py-6 text-[#140033] placeholder:text-[#140033]/40 focus:outline-none text-[18px]"
+                    className="w-full h-[50px] md:w-[451px] md:h-[72px] bg-[#EDEDED] rounded-[49px] px-8 py-6 text-[#140033] placeholder:text-[#140033]/40 focus:outline-none text-[18px]"
                   />
                   {!field.state.value && (
                     <label htmlFor="title" className="absolute left-8 top-1/2 -translate-y-1/2 text-[#140033]/40 text-[18px] pointer-events-none">
@@ -259,7 +282,7 @@ export default function PostProduct() {
                     type="number"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    className="w-full bg-[#EDEDED] rounded-[24px] pl-14 pr-8 py-6 text-[#140033] placeholder:text-[#140033]/40 focus:outline-none text-[18px]"
+                    className="w-full h-[50px] md:w-[451px] md:h-[72px] bg-[#EDEDED] rounded-[49px] pl-14 pr-8 py-6 text-[#140033] placeholder:text-[#140033]/40 focus:outline-none text-[18px]"
                   />
                   {!field.state.value && (
                     <label htmlFor="price" className="absolute left-14 top-1/2 -translate-y-1/2 text-[#140033]/40 text-[18px] pointer-events-none">
@@ -278,7 +301,7 @@ export default function PostProduct() {
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     rows={6}
-                    className="w-full bg-[#EDEDED] rounded-[24px] px-8 py-6 text-[#140033] placeholder:text-[#140033]/40 focus:outline-none text-[18px] resize-none"
+                    className="w-full h-[150px] md:w-[451px] md:h-[185px] bg-[#EDEDED] rounded-[22px] px-8 py-6 text-[#140033] placeholder:text-[#140033]/40 focus:outline-none text-[18px] resize-none"
                   />
                   {!field.state.value && (
                     <label htmlFor="description" className="absolute left-8 top-6 text-[#140033]/40 text-[18px] pointer-events-none">
@@ -296,7 +319,7 @@ export default function PostProduct() {
                     id="category"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    className="w-full appearance-none bg-[#EDEDED] rounded-[24px] px-8 py-6 text-[#140033]/40 focus:text-[#140033] focus:outline-none text-[18px] cursor-pointer"
+                    className="w-full h-[50px] md:w-[451px] md:h-[72px] appearance-none bg-[#EDEDED] rounded-[49px] px-8 py-6 text-[#140033]/40 focus:text-[#140033] focus:outline-none text-[18px] cursor-pointer"
                   >
                     <option value="" disabled>Category</option>
                     {categories?.map((cat) => (
@@ -308,7 +331,7 @@ export default function PostProduct() {
                         Category
                      </label>
                   )}
-                  <ChevronDown className="absolute right-8 top-1/2 -translate-y-1/2 text-[#140033] pointer-events-none" size={24} />
+                  <ChevronDown className="absolute right-6 lg:right-6 top-1/2 -translate-y-1/2 text-[#140033] pointer-events-none" size={24} />
                 </div>
               )}
             </form.Field>
@@ -317,7 +340,7 @@ export default function PostProduct() {
               <button
                 type="submit"
                 disabled={isUploading || createProduct.isPending}
-                className="w-full bg-[#8E74FF] hover:bg-[#7C5CFF] disabled:bg-[#8E74FF]/50 text-white font-medium py-6 rounded-full transition-all text-[20px] flex items-center justify-center gap-3"
+                className="w-full h-[50px] md:w-[451px] md:h-[72px] bg-[#8E74FF] hover:bg-[#7C5CFF] disabled:bg-[#8E74FF]/50 text-white font-medium py-6 rounded-[49px] transition-all text-[20px] flex items-center justify-center gap-3"
               >
                 {isUploading || createProduct.isPending ? (
                   <>

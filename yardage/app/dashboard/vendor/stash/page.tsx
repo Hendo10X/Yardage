@@ -8,6 +8,7 @@ import Icon2 from "@/images/icon2.svg"
 import Icon3 from "@/images/icon3.svg"
 import Icon4 from "@/images/icon4.svg"
 import ActiveItems from './ActiveItems'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const Stash = () => {
   const { data: stats, isLoading } = trpc.product.getStashStats.useQuery()
@@ -50,12 +51,12 @@ const Stash = () => {
   return (
     <div className='px-6 lg:px-20 py-6 lg:py-10 bg-white min-h-screen'>
         <div>
-            <h1 className='md:text-[40px] font-bold mb-10 text-[30px]'>My stash</h1>
+            <h1 className='md:text-[40px] font-bold mb-10 text-[25px]'>My stash</h1>
             
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
                 {isLoading ? (
                     Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="bg-[#EFEFEF] p-6 rounded-[22px] h-[160px] animate-pulse" />
+                        <Skeleton key={i} className="h-[160px] rounded-[22px]" />
                     ))
                 ) : cards.map((item) => (
                     <div 

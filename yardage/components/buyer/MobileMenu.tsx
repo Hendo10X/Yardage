@@ -1,10 +1,11 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef } from "react"
 import Link from "next/link"
 import { X, Search } from "lucide-react"
 import { Button } from "../ui/button"
 import gsap from "gsap"
+import { useGSAP } from "@gsap/react"
 import RoleSwitcher from "./RoleSwitcher"
 import { authClient } from "@/lib/auth-client"
 import Image from "next/image"
@@ -24,7 +25,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
     const isActive = (path: string) => pathname === path
 
-    useEffect(() => {
+    useGSAP(() => {
         if (isOpen) {
             gsap.to(menuRef.current, {
                 x: 0,

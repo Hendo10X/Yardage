@@ -3,7 +3,7 @@
 import { BuyerProvider, useBuyer } from "@/context/BuyerContext"
 import Navbar from "@/components/buyer/navbar"
 import FilterDrawer from "@/components/buyer/FilterDrawer"
-import { Footer } from "@/components/Footer"
+import Footer from "@/components/Footer"
 
 function BuyerLayoutContent({ children }: { children: React.ReactNode }) {
     const { isFilterOpen, setIsFilterOpen, filters, setFilters, setSearchQuery } = useBuyer()

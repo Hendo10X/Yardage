@@ -1,11 +1,13 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import { authClient } from "@/lib/auth-client"
 import Image from "next/image"
 import gsap from "gsap"
+import { useGSAP } from "@gsap/react"
 import { LogOut, User } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { Skeleton } from "./ui/skeleton"
 
 export default function UserDropdown() {
     const { data: session, isPending } = authClient.useSession()
@@ -14,7 +16,7 @@ export default function UserDropdown() {
     const menuRef = useRef<HTMLDivElement>(null)
     const router = useRouter()
 
-    useEffect(() => {
+    useGSAP(() => {
         if (isOpen) {
             gsap.fromTo(menuRef.current, 
                 { opacity: 0, y: -10, scale: 0.95 }, 
@@ -35,7 +37,7 @@ export default function UserDropdown() {
         })
     }
 
-    if (isPending) return <div className="h-10 w-10 animate-pulse bg-gray-200 rounded-full" />
+    if (isPending) return <Skeleton className="h-10 w-10 rounded-full" />
 
     if (!session) {
         return (

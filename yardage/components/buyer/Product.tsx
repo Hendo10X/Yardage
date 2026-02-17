@@ -47,7 +47,7 @@ export default function Product({ filters, searchQuery }: ProductProps) {
       <div className='' ref={containerRef}>
           <div className='px-6 lg:px-20 py-6 lg:py-10'>
             <div>
-              <h1 className='text-[57px] font-medium mb-12'>Yard</h1>
+              <h1 className='lg:text-[50px] text-[40px] font-medium mb-12'>Yard</h1>
               <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-12'>
                 {isLoading ? (
                   Array.from({ length: 8 }).map((_, i) => (

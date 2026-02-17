@@ -6,6 +6,7 @@ import { useUploadThing } from '@/lib/uploadthing'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
 import { Loader2, Plus, X } from 'lucide-react'
+import { Skeleton } from '../ui/skeleton'
 import Image from 'next/image'
 
 export default function CreateStore() {
@@ -80,8 +81,8 @@ export default function CreateStore() {
   return (
     <div className="max-w-[800px] mx-auto px-6 py-12">
       <div className="text-center mb-12">
-        <h1 className="text-[40px] font-bold text-[#140033] mb-4">Set up your vendor profile</h1>
-        <p className="text-[18px] text-[#140033]/60">Fill in these details to start posting products on Yardage</p>
+        <h1 className="text-[32px] font-bold text-[#140033] mb-4">Set up your vendor profile</h1>
+        <p className="text-[16px] text-[#140033]/60">Fill in these details to start posting products on Yardage</p>
       </div>
 
       <form 

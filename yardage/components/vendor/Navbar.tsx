@@ -36,19 +36,25 @@ export default function Navbar({ onFilterClick, onSearch }: NavbarProps) {
             <div className='flex items-center '>
                 <Image src={Logo} alt='Logo' className='w-[100px] h-[100px] lg:hidden flex' />
                 <ul className='hidden lg:flex items-center gap-6'>
-                    {navLinks.map((link) => (
-                        <Link 
-                            key={link.href}
-                            href={link.href} 
-                            className={`px-6 py-2 rounded-full text-[16px] transition-all ${
-                                pathname === link.href 
-                                    ? 'bg-[#F0F0F0] font-medium' 
-                                    : 'font-normal hover:bg-gray-50'
-                            }`}
-                        >
-                            {link.name}
-                        </Link>
-                    ))}
+                    {navLinks.map((link) => {
+                        const isActive = link.href === '/dashboard/vendor' 
+                            ? pathname === '/dashboard/vendor' || pathname === '/dashboard/vendor/stash'
+                            : pathname.startsWith(link.href);
+                            
+                        return (
+                            <Link 
+                                key={link.href}
+                                href={link.href} 
+                                className={`px-6 py-2 rounded-full text-[16px] transition-all font-medium ${
+                                    isActive 
+                                        ? 'bg-[#F0F0F0] text-[#140033]' 
+                                        : 'text-[#140033]/60 hover:text-[#140033] hover:bg-gray-100'
+                                }`}
+                            >
+                                {link.name}
+                            </Link>
+                        );
+                    })}
                 </ul>
             </div>
 
@@ -59,7 +65,7 @@ export default function Navbar({ onFilterClick, onSearch }: NavbarProps) {
 
             <div className="lg:hidden">
                 <Button variant="ghost" onClick={() => setIsMobileMenuOpen(true)} className="">
-                    <Menu size={100} className='text-black' />
+                    <Menu size={70} strokeWidth={3.5} className='text-black' />
                 </Button>
             </div>
         </div>
