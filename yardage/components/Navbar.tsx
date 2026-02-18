@@ -15,20 +15,20 @@ export default function Navbar() {
 
   return (
     <nav className="relative w-full">
-      <div className="flex justify-between items-center gap-4 px-6 lg:px-28 py-6 lg:py-10">
+      <div className="flex justify-between items-center gap-4 px-4 md:px-14 lg:px-28 py-6 lg:py-10">
         <Link href="/" className="z-50">
           <Image src={Logo} alt="Logo" width={120} height={40} className="w-auto h-8 md:h-10" />
         </Link>
 
         {/* Desktop Navigation */}
-        <ul className="hidden md:flex gap-8 items-center">
+        <ul className="hidden lg:flex gap-8 items-center">
           <Link href="/about" className="text-medium text-[18px] hover:text-primary transition-colors">About us</Link>
           <Link href="/faq" className="text-medium text-[18px] hover:text-primary transition-colors">FAQ</Link>
           <Link href="/how-it-works" className="text-medium text-[18px] hover:text-primary transition-colors">How it works</Link>
         </ul>
 
         {/* Desktop Auth Links */}
-        <div className="hidden md:flex gap-6 items-center">
+        <div className="hidden lg:flex gap-6 items-center">
           <Link href="/login" className="text-medium text-[18px] hover:text-primary transition-colors">Login</Link>
           <Button className='cursor-pointer bg-primary text-primary-foreground px-4 py-2 rounded-full text-[18px] font-medium'>
             <Link href="/signup" onClick={toggleMenu} className="">
@@ -39,7 +39,7 @@ export default function Navbar() {
 
         {/* Mobile Menu Toggle */}
         <button 
-          className="md:hidden z-50 p-2 text-foreground" 
+          className="lg:hidden z-50 p-2 text-foreground" 
           onClick={toggleMenu}
           aria-label="Toggle menu"
         >

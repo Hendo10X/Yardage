@@ -7,7 +7,7 @@ import { ArrowLeft } from 'lucide-react'
 
 const LoginPage = () => {
   return (
-    <div className="h-screen py-12 px-6 md:px-14 bg-[#F9F3FD]">
+    <div className="h-screen py-6 px-6 md:px-14 bg-[#F9F3FD]">
       <Link href="/" className="text-[14px] font-normal text-left text-[#828181] flex items-center gap-2"> <ArrowLeft /> Back</Link>
         <div className="flex flex-col items-center justify-center gap-6 py-24">
           <div className="flex flex-col items-start gap-6">

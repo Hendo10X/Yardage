@@ -60,6 +60,13 @@ export const SignupForm = () => {
     { enabled: username.length >= 3 }
   )
 
+  const email = useStore(form.store, (state) => state.values.email)
+  const isEmailValid = z.string().email().safeParse(email).success
+  const { data: uniStatus, isLoading: isCheckingUni } = trpc.user.checkUniversity.useQuery(
+    { email },
+    { enabled: isEmailValid }
+  )
+
   return (
     <div className="">
       <form
@@ -69,7 +76,7 @@ export const SignupForm = () => {
           form.handleSubmit()
         }}
       >
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           <form.Field name="username">
             {(field) => (
               <div className="flex flex-col gap-1">
@@ -115,6 +122,15 @@ export const SignupForm = () => {
                       : (field.state.meta.errors[0] as any)?.message}
                   </p>
                 )}
+                {isEmailValid && (
+                   <p className={`text-sm px-2 ${isCheckingUni ? "text-gray-500" : uniStatus?.registered ? "text-green-500" : "text-red-500"}`}>
+                     {isCheckingUni 
+                       ? "Verifying university..." 
+                       : uniStatus?.registered 
+                         ? `Verified: ${uniStatus.universityName}` 
+                         : "Your university is not yet registered. Contact support or use a whitelisted email."}
+                   </p>
+                )}
               </div>
             )}
           </form.Field>
@@ -146,7 +162,7 @@ export const SignupForm = () => {
             {([canSubmit, isSubmitting]) => (
               <Button
                 type="submit"
-                disabled={!canSubmit || isSubmitting || isPending || !usernameStatus?.available}
+                disabled={!canSubmit || isSubmitting || isPending || !usernameStatus?.available || !uniStatus?.registered}
                 className="rounded-[22px] px-6 py-2 text-[18px] bg-[#9369FF] w-[422px] h-[70px]"
               >
                 {isSubmitting || isPending ? "Creating Account..." : "Get Started"}
@@ -155,13 +171,14 @@ export const SignupForm = () => {
           </form.Subscribe>
         </div>
       </form>
-      <div className="flex justify-center py-6">
+      <div className="flex flex-col items-center justify-center py-6 gap-3">
         <p className="text-center text-[20px] font-normal text-[#828181]">
           Already have an account?{" "}
           <Link href="/login" className="underline">
             Login here
           </Link>
         </p>
+        <Link href="/universities" className="text-[16px] font-medium underline text-left text-[#9369FF] flex items-center gap-2"> See if your university has been listed here</Link>
       </div>
     </div>
   )

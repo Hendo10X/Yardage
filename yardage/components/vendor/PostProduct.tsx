@@ -25,6 +25,8 @@ export default function PostProduct() {
     onSuccess: () => {
       toast.success("Product posted! It's now live on the marketplace.")
       utils.product.list.invalidate()
+      utils.product.getStashStats.invalidate()
+      utils.vendor.stats.invalidate()
       router.push('/dashboard/vendor')
     },
     onError: (error) => {

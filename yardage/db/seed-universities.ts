@@ -4,8 +4,11 @@ import { eq } from "drizzle-orm";
 
 async function main() {
   const universities = [
-    { name: "Federal University of Technology Owerri", domain: "futo.edu.ng" },
-    { name: "University of Lagos", domain: "unilag.edu.ng" },
+    { name: "Federal university of technology, Owerri", domain: "futo.edu.ng" },
+    { name: "Imo state university, Owerri", domain: "imsu.edu.ng" },
+    { name: "University of Lagos, Yaba", domain: "unilag.edu.ng" },
+    { name: "Lead City University, Ibadan", domain: "lcu.edu.ng" },
+    { name: "University of Nigeria, Nsukka", domain: "unn.edu.ng" },
   ];
 
   console.log("Seeding whitelisted universities...");

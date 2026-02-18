@@ -55,7 +55,7 @@ export const LoginForm = () => {
           form.handleSubmit()
         }}
       >
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           <form.Field name="email">
             {(field) => (
               <div className="flex flex-col gap-1">

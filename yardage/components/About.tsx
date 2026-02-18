@@ -76,10 +76,10 @@ export default function About() {
             </div>
 
             {/* Section 4: CTA Cards */}
-            <div className='bg-[#F2F2F2] rounded-[40px] p-4 lg:p-12'>
+            <div className='bg-[#F2F2F2] rounded-[28px] p-4 lg:p-12'>
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-1'>
                     {/* Join Card */}
-                    <div className=' rounded-l-[32px] md:rounded-r-none rounded-t-[32px] md:rounded-t-[32px] p-10 lg:p-16 space-y-8 border-r-0 md:border-r border-gray-100'>
+                    <div className=' rounded-l-[28px] md:rounded-r-none rounded-t-[28px] md:rounded-t-[28px] p-10 lg:p-16 space-y-8 border-r-0 md:border-r border-gray-100'>
                         <div className="w-10 h-10 rounded-full bg-[#00D756]" />
                         <div className="space-y-4">
                             <h3 className="text-[24px] md:text-[28px] font-bold leading-tight">

@@ -58,11 +58,17 @@ export const storeRouter = router({
   getById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
-      const [found] = await db
-        .select()
-        .from(store)
-        .where(eq(store.id, input.id))
-        .limit(1);
+      const found = await db.query.store.findFirst({
+        where: eq(store.id, input.id),
+        with: {
+          owner: {
+            columns: {
+              email: true,
+              name: true,
+            }
+          }
+        }
+      });
 
       if (!found) notFound("Store");
       return found;
@@ -71,11 +77,17 @@ export const storeRouter = router({
   getBySlug: publicProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ input }) => {
-      const [found] = await db
-        .select()
-        .from(store)
-        .where(eq(store.slug, input.slug))
-        .limit(1);
+      const found = await db.query.store.findFirst({
+        where: eq(store.slug, input.slug),
+        with: {
+          owner: {
+            columns: {
+              email: true,
+              name: true,
+            }
+          }
+        }
+      });
 
       if (!found) notFound("Store");
       return found;

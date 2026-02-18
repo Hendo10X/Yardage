@@ -15,6 +15,7 @@ import { toast } from 'sonner'
 export default function ProductPage() {
   const params = useParams()
   const router = useRouter()
+  const utils = trpc.useUtils()
   const productId = params.id as string
   
   const { data: product, isLoading, error } = trpc.product.getById.useQuery({ id: productId })
@@ -23,6 +24,7 @@ export default function ProductPage() {
   const createOrder = trpc.order.create.useMutation({
     onSuccess: (order) => {
       toast.success("Order placed successfully! Check your dashboard for details.")
+      utils.order.listMyOrders.invalidate()
       router.push(`/dashboard/buyer/orders/${order?.id}`)
     },
     onError: (err) => {
@@ -44,6 +46,7 @@ export default function ProductPage() {
     onSuccess: (data) => {
       toast.success(data.added ? "Added to your wishlist!" : "Removed from your wishlist.")
       refetchWishlist()
+      utils.wishlist.list.invalidate()
     },
     onError: (err) => {
       toast.error(err.message || "Action failed. Please try again later.")
@@ -149,7 +152,7 @@ export default function ProductPage() {
 
                 <div className="flex items-center gap-4 mb-8">
                     <p className="text-[14px] text-[#666666]">Posted by {product.store.name}</p>
-                    <Link href="#" className="text-[14px] text-[#9369FF] hover:underline">
+                    <Link href={`/store/${product.store.id}`} className="text-[14px] text-[#9369FF] hover:underline">
                         Visit profile
                     </Link>
                 </div>
